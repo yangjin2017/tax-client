@@ -3,7 +3,7 @@ import { getRequest, postRequest, putRequest, deleteRequest, uploadFileRequest }
 
 // 登陆
 export const login = (params) => {
-    return postRequest('/login', params)
+    return postRequest('/user/login', params)
 }
 // 获取用户登录信息
 export const userInfo = (params) => {
@@ -84,7 +84,7 @@ export const getRelatedListData = (params) => {
 
 // 获取用户数据 多条件
 export const getUserListData = (params) => {
-    return getRequest('/user/getByCondition', params)
+    return postRequest('/user/all', params)
 }
 // 获取全部用户数据
 export const getAllUserData = (params) => {
@@ -92,11 +92,11 @@ export const getAllUserData = (params) => {
 }
 // 添加用户
 export const addUser = (params) => {
-    return postRequest('/user/admin/add', params)
+    return postRequest('/user/add', params)
 }
 // 编辑用户
 export const editUser = (params) => {
-    return postRequest('/user/admin/edit', params)
+    return postRequest('/user/edit', params)
 }
 // 启用用户
 export const enableUser = (id, params) => {
@@ -138,7 +138,7 @@ export const deleteDepartment = (ids, params) => {
 
 // 获取全部角色数据
 export const getAllRoleList = (params) => {
-    return getRequest('/role/getAllList', params)
+    return getRequest('/role/all', params)
 }
 // 分页获取角色数据
 export const getRoleList = (params) => {
@@ -146,7 +146,7 @@ export const getRoleList = (params) => {
 }
 // 添加角色
 export const addRole = (params) => {
-    return postRequest('/role/save', params)
+    return postRequest('/role/add', params)
 }
 // 编辑角色
 export const editRole = (params) => {
@@ -162,14 +162,14 @@ export const editRolePerm = (id, params) => {
 }
 // 删除角色
 export const deleteRole = (ids, params) => {
-    return deleteRequest(`/role/delAllByIds/${ids}`, params)
+    return deleteRequest(`/role/del/${ids}`, params)
 }
 
 
 
 // 获取全部权限数据
 export const getAllPermissionList = (params) => {
-    return getRequest('/permission/getAllList', params)
+    return postRequest('/permission/getAllList', params)
 }
 // 添加权限
 export const addPermission = (params) => {

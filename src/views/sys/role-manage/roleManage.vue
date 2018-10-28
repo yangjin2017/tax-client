@@ -30,10 +30,10 @@
         <Modal :title="modalTitle" v-model="roleModalVisible" :mask-closable='false' :width="500">
           <Form ref="roleForm" :model="roleForm" :label-width="80" :rules="roleFormValidate">
             <FormItem label="角色名称" prop="name">
-              <Input v-model="roleForm.name" placeholder="按照Spring Security约定建议以‘ROLE_’开头"/>
+              <Input v-model="roleForm.name" placeholder=""/>
             </FormItem>
-            <FormItem label="备注" prop="description">
-              <Input v-model="roleForm.description"/>
+            <FormItem label="角色编码" prop="code">
+              <Input v-model="roleForm.code"/>
             </FormItem>
           </Form>
           <div slot="footer">
@@ -55,7 +55,7 @@
 
 <script>
 import {
-  getRoleList,
+  getAllRoleList,
   getAllPermissionList,
   addRole,
   editRole,
@@ -82,10 +82,11 @@ export default {
       permModalVisible: false,
       modalTitle: "",
       roleForm: {
-        description: ""
+        code: ""
       },
       roleFormValidate: {
-        name: [{ required: true, message: "角色名称不能为空", trigger: "blur" }]
+        name: [{ required: true, message: "角色名称不能为空", trigger: "blur" }],
+        code: [{ required: true, message: "角色编码不能为空", trigger: "blur" }]
       },
       submitLoading: false,
       selectList: [],
@@ -104,11 +105,12 @@ export default {
         {
           title: "角色名称",
           key: "name",
+          // width: 190,
           sortable: true
         },
         {
-          title: "备注",
-          key: "description",
+          title: "角色编码",
+          key: "code",
           width: 190,
           sortable: true
         },
@@ -119,12 +121,12 @@ export default {
           sortable: true,
           sortType: "desc"
         },
-        {
+        /* {
           title: "更新时间",
           key: "updateTime",
           width: 160,
           sortable: true
-        },
+        }, */
         {
           title: "是否设置为注册用户默认角色",
           key: "defaultRole",
@@ -252,7 +254,7 @@ export default {
     init() {
       this.getRoleList();
       // 获取所有菜单权限树
-      this.getPermList();
+      // this.getPermList();
     },
     changePage(v) {
       this.pageNumber = v;
@@ -279,12 +281,10 @@ export default {
         sort: this.sortColumn,
         order: this.sort
       };
-      getRoleList(params).then(res => {
+      getAllRoleList(params).then(res => {
         this.loading = false;
-        if (res.success === true) {
-          this.data = res.result.content;
-          this.total = res.result.totalElements;
-        }
+        this.data = res.data;
+        this.total = res.data.length;
       });
     },
     getPermList() {
@@ -316,28 +316,25 @@ export default {
     submitRole() {
       this.$refs.roleForm.validate(valid => {
         if (valid) {
-          if (this.modalType === 0) {
+          this.submitLoading = true;
+          let roleFn = this.modalType === 0 ? addRole : editRole;
+          roleFn(this.roleForm).then(res => {
+            this.submitLoading = false;
+            this.$Message.success("操作成功");
+            this.getRoleList();
+            this.roleModalVisible = false;
+          });
+          /* if (this.modalType === 0) {
             // 添加
-            this.submitLoading = true;
-            addRole(this.roleForm).then(res => {
-              this.submitLoading = false;
-              if (res.success === true) {
-                this.$Message.success("操作成功");
-                this.getRoleList();
-                this.roleModalVisible = false;
-              }
-            });
+            addRole
           } else {
-            this.submitLoading = true;
             editRole(this.roleForm).then(res => {
               this.submitLoading = false;
-              if (res.success === true) {
-                this.$Message.success("操作成功");
-                this.getRoleList();
-                this.roleModalVisible = false;
-              }
+              this.$Message.success("操作成功");
+              this.getRoleList();
+              this.roleModalVisible = false;
             });
-          }
+          } */
         }
       });
     },
@@ -370,10 +367,8 @@ export default {
           this.operationLoading = true;
           deleteRole(v.id).then(res => {
             this.operationLoading = false;
-            if (res.success === true) {
-              this.$Message.success("删除成功");
-              this.getRoleList();
-            }
+            this.$Message.success("删除成功");
+            this.getRoleList();
           });
         }
       });
@@ -442,11 +437,9 @@ export default {
           this.operationLoading = true;
           deleteRole(ids).then(res => {
             this.operationLoading = false;
-            if (res.success === true) {
-              this.$Message.success("删除成功");
-              this.clearSelectAll();
-              this.getRoleList();
-            }
+            this.$Message.success("删除成功");
+            this.clearSelectAll();
+            this.getRoleList();
           });
         }
       });

@@ -8,23 +8,23 @@
                 <Card>
                     <Row>
                         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-                            <Form-item label="用户名称" prop="username">
-                              <Input type="text" v-model="searchForm.username" clearable placeholder="请输入用户名" style="width: 200px"/>
+                            <Form-item label="用户名称" prop="userName">
+                              <Input type="text" v-model="searchForm.userName" clearable placeholder="请输入用户名" style="width: 200px"/>
                             </Form-item>
                             <Form-item label="部门" prop="department">
                               <Cascader v-model="selectDep" :data="department" :load-data="loadData" @on-change="handleChangeDep" change-on-select filterable placeholder="请选择或输入搜索部门" style="width: 200px"></Cascader>
                             </Form-item>
                             <span v-if="drop">
-                            <Form-item label="手机号" prop="mobile">
-                              <Input type="text" v-model="searchForm.mobile" clearable placeholder="请输入手机号" style="width: 200px"/>
+                            <Form-item label="手机号" prop="tel">
+                              <Input type="text" v-model="searchForm.tel" clearable placeholder="请输入手机号" style="width: 200px"/>
                             </Form-item>
                               <Form-item label="邮箱" prop="email">
                                 <Input type="text" v-model="searchForm.email" clearable placeholder="请输入邮箱" style="width: 200px"/>
                               </Form-item>
                               <Form-item label="性别" prop="sex">
                                 <Select v-model="searchForm.sex" placeholder="请选择" clearable style="width: 200px">
-                                  <Option value="0">女</Option>
-                                  <Option value="1">男</Option>
+                                  <Option value="0">男</Option>
+                                  <Option value="1">女</Option>
                                 </Select>
                               </Form-item>
                               <Form-item label="用户类型" prop="type">
@@ -63,8 +63,7 @@
                           <DropdownMenu slot="list">
                               <DropdownItem name="refresh">刷新</DropdownItem>
                               <DropdownItem name="exportData">导出所选数据</DropdownItem>
-                              <DropdownItem name="exportAll">导出全部数据</DropdownItem>
-                              <DropdownItem name="importData">导入数据(付费)</DropdownItem>
+                              <!-- <DropdownItem name="exportAll">导出全部数据</DropdownItem> -->
                           </DropdownMenu>
                         </Dropdown>
                         <circleLoading v-if="operationLoading"/>
@@ -87,25 +86,28 @@
         </Row>
         <Modal :title="modalTitle" v-model="userModalVisible" :mask-closable='false' :width="500" :styles="{top: '30px'}">
             <Form ref="userForm" :model="userForm" :label-width="70" :rules="userFormValidate">
-                <FormItem label="用户名" prop="username">
-                    <Input v-model="userForm.username" autocomplete="off"/>
+                <FormItem label="用户名" prop="userName">
+                    <Input v-model="userForm.userName" autocomplete="off"/>
                 </FormItem>
                 <FormItem label="密码" prop="password" v-if="modalType===0" :error="errorPass">
                     <Input type="password" v-model="userForm.password" autocomplete="off"/>
                 </FormItem>
+                <FormItem label="工号" prop="workNumber">
+                    <Input v-model="userForm.workNumber"/>
+                </FormItem>
                 <FormItem label="邮箱" prop="email">
                     <Input v-model="userForm.email"/>
                 </FormItem>
-                <FormItem label="手机号" prop="mobile">
-                    <Input v-model="userForm.mobile"/>
+                <FormItem label="手机号" prop="tel">
+                    <Input v-model="userForm.tel"/>
                 </FormItem>
                 <FormItem label="性别" prop="sex">
                   <RadioGroup v-model="userForm.sex">
-                    <Radio :label="1">男</Radio>
-                    <Radio :label="0">女</Radio>
+                    <Radio :label="0">男</Radio>
+                    <Radio :label="1">女</Radio>
                   </RadioGroup>
                 </FormItem>
-                <Form-item label="头像" prop="avatar">
+                <!-- <Form-item label="头像" prop="avatar">
                   <Poptip trigger="hover" title="图片预览" placement="right" width="350">
                       <Input v-model="userForm.avatar" placeholder="可直接填入网络图片链接" clearable/>
                       <div slot="content">
@@ -149,12 +151,12 @@
                   <Select v-model="userForm.roles" multiple>
                       <Option v-for="item in roleList" :value="item.id" :key="item.id" :label="item.name">
                         <!-- <div style="display:flex;flex-direction:column"> -->
-                        <span style="margin-right:10px;">{{ item.name }}</span>
-                        <span style="color:#ccc;">{{ item.description }}</span>
+                        <!-- <span style="margin-right:10px;">{{ item.name }}</span>
+                        <span style="color:#ccc;">{{ item.description }}</span> -->
                         <!-- </div> -->
-                      </Option>
+                      <!--</Option>
                   </Select>
-                </FormItem>
+                </FormItem> -->
             </Form>
             <div slot="footer">
                 <Button type="text" @click="cancelUser">取消</Button>
@@ -228,9 +230,9 @@ export default {
       selectDep: [],
       dataDep: [],
       searchForm: {
-        username: "",
+        userName: "",
         departmentId: "",
-        mobile: "",
+        tel: "",
         email: "",
         sex: "",
         type: "",
@@ -247,21 +249,24 @@ export default {
       userModalVisible: false,
       modalTitle: "",
       userForm: {
-        sex: 1,
+        userName: '',
+        password: '',
+        workNumber: null,
+        /* sex: 1,
         type: 0,
         avatar: "https://s1.ax1x.com/2018/05/19/CcdVQP.png",
         roles: [],
         departmentId: "",
-        departmentTitle: ""
+        departmentTitle: "" */
       },
       userRoles: [],
       roleList: [],
       errorPass: "",
       userFormValidate: {
-        username: [
+        userName: [
           { required: true, message: "账号不能为空", trigger: "blur" }
         ],
-        mobile: [
+        tel: [
           { required: true, message: "手机号不能为空", trigger: "blur" },
           { validator: validateMobile, trigger: "blur" }
         ],
@@ -285,13 +290,19 @@ export default {
           fixed: "left"
         },
         {
-          title: "用户名",
-          key: "username",
+          title: "姓名",
+          key: "realName",
           width: 145,
           sortable: true,
           fixed: "left"
         },
         {
+          title: "用户名",
+          key: "userName",
+          width: 145,
+          // sortable: true
+        },
+        /*{
           title: "头像",
           key: "avatar",
           width: 80,
@@ -303,6 +314,11 @@ export default {
               }
             });
           }
+        },*/
+        {
+          title: "工号",
+          key: "workNumber",
+          width: 120
         },
         {
           title: "所属部门",
@@ -311,16 +327,16 @@ export default {
         },
         {
           title: "手机",
-          key: "mobile",
+          key: "tel",
           width: 115,
           sortable: true,
-          render: (h, params) => {
+          /* render: (h, params) => {
             if (this.getStore("roles").includes("ROLE_ADMIN")) {
-              return h("span", params.row.mobile);
+              return h("span", params.row.tel);
             } else{
               return h("span", "您无权查看该数据");
             }
-          }
+          } */
         },
         {
           title: "邮箱",
@@ -335,9 +351,9 @@ export default {
           align: "center",
           render: (h, params) => {
             let re = "";
-            if (params.row.sex === 1) {
+            if (params.row.sex === 0) {
               re = "男";
-            } else if (params.row.sex === 0) {
+            } else if (params.row.sex === 1) {
               re = "女";
             }
             return h("div", re);
@@ -540,7 +556,7 @@ export default {
       exportColumns: [
         {
           title: "用户名",
-          key: "username"
+          key: "userName"
         },
         {
           title: "头像",
@@ -556,7 +572,7 @@ export default {
         },
         {
           title: "手机",
-          key: "mobile"
+          key: "tel"
         },
         {
           title: "邮箱",
@@ -594,12 +610,12 @@ export default {
   },
   methods: {
     init() {
-      this.accessToken = {
+      /* this.accessToken = {
         accessToken: this.getStore("accessToken")
-      };
-      this.initDepartmentData();
+      }; */
+      // this.initDepartmentData();
       this.getUserList();
-      this.initDepartmentTreeData();
+      // this.initDepartmentTreeData();
     },
     initDepartmentData() {
       initDepartment().then(res => {
@@ -736,10 +752,8 @@ export default {
       this.loading = true;
       getUserListData(this.searchForm).then(res => {
         this.loading = false;
-        if (res.success === true) {
-          this.data = res.result.content;
-          this.total = res.result.totalElements;
-        }
+        this.data = res.data.list;
+        this.total = res.data.total;
       });
     },
     handleSearch() {
@@ -793,11 +807,6 @@ export default {
         });
       } else if (name === "exportAll") {
         this.modalExportAll = true;
-      } else if (name === "importData") {
-        this.$Modal.info({
-          title: "请获取完整版",
-          content: "支付链接: http://xpay.exrick.cn/pay?xboot"
-        });
       }
     },
     exportAll() {
@@ -837,22 +846,18 @@ export default {
             this.submitLoading = true;
             addUser(this.userForm).then(res => {
               this.submitLoading = false;
-              if (res.success === true) {
-                this.$Message.success("操作成功");
-                this.getUserList();
-                this.userModalVisible = false;
-              }
+              this.$Message.success("操作成功");
+              this.getUserList();
+              this.userModalVisible = false;
             });
           } else {
             // 编辑
             this.submitLoading = true;
             editUser(this.userForm).then(res => {
               this.submitLoading = false;
-              if (res.success === true) {
-                this.$Message.success("操作成功");
-                this.getUserList();
-                this.userModalVisible = false;
-              }
+              this.$Message.success("操作成功");
+              this.getUserList();
+              this.userModalVisible = false;
             });
           }
         }
@@ -877,11 +882,11 @@ export default {
       });
     },
     beforeUpload() {
-      if (!this.$route.meta.permTypes.includes("upload")) {
+      /* if (!this.$route.meta.permTypes.includes("upload")) {
         this.$Message.error("此处您没有上传权限(为演示功能，该按钮未配置隐藏)");
         return false;
       }
-      return true;
+      return true; */
     },
     handleSuccess(res, file) {
       if (res.success === true) {
@@ -914,16 +919,16 @@ export default {
       let userInfo = JSON.parse(str);
       this.userForm = userInfo;
       let selectRolesId = [];
-      this.userForm.roles.forEach(function(e) {
+      /* this.userForm.roles.forEach(function(e) {
         selectRolesId.push(e.id);
       });
-      this.userForm.roles = selectRolesId;
+      this.userForm.roles = selectRolesId; */
       this.userModalVisible = true;
     },
     enable(v) {
       this.$Modal.confirm({
         title: "确认启用",
-        content: "您确认要启用用户 " + v.username + " ?",
+        content: "您确认要启用用户 " + v.userName + " ?",
         onOk: () => {
           this.operationLoading = true;
           enableUser(v.id).then(res => {
@@ -939,7 +944,7 @@ export default {
     disable(v) {
       this.$Modal.confirm({
         title: "确认禁用",
-        content: "您确认要禁用用户 " + v.username + " ?",
+        content: "您确认要禁用用户 " + v.userName + " ?",
         onOk: () => {
           this.operationLoading = true;
           disableUser(v.id).then(res => {
@@ -955,15 +960,13 @@ export default {
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
-        content: "您确认要删除用户 " + v.username + " ?",
+        content: "您确认要删除用户 " + v.userName + " ?",
         onOk: () => {
           this.operationLoading = true;
           deleteUser(v.id).then(res => {
             this.operationLoading = false;
-            if (res.success === true) {
-              this.$Message.success("删除成功");
-              this.getUserList();
-            }
+            this.$Message.success("删除成功");
+            this.getUserList();
           });
         }
       });
@@ -1015,7 +1018,7 @@ export default {
   },
   mounted() {
     this.init();
-    this.getRoleList();
+    // this.getRoleList();
   }
 };
 </script>

@@ -7,8 +7,9 @@ module.exports = {
                 target: 'http://127.0.0.1:8888',  // 请求本地 需要xboot后台项目
                 ws: true
             },
-            '/foo': {
-                target: '<other_url>'
+            '/api': {
+                target: 'http://localhost:8080',
+                pathRewrite:{"^/api":""}
             }
         }
     },

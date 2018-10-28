@@ -120,7 +120,7 @@ export default {
       maxLength: 6,
       errorCode: "",
       form: {
-        username: "test或test2 可注册",
+        username: "test",
         password: "123456",
         mobile: "捐赠获取完整版功能",
         code: ""
@@ -186,10 +186,16 @@ export default {
           if (valid) {
             this.loading = true;
             login({
-              username: this.form.username,
+              userName: this.form.username,
               password: this.form.password,
               saveLogin: this.saveLogin
             }).then(res => {
+              // TODO: 暂时跳过获取用户信息
+              Cookies.set('userInfo', "{username: 'test'}", {expires: 7});
+              this.$router.push({
+                name: "home_index"
+              });
+              // TODO:
               if (res.success === true) {
                 this.setStore("accessToken", res.result);
                 // 获取用户信息
@@ -248,29 +254,9 @@ export default {
     toWeixinLogin() {
       this.$Message.error("开通微信登录官方收费300/年");
     },
-    relatedLogin() {
-      
-    },
     showAccount() {
-      this.$Notice.info({
-        title: "体验账号密码",
-        desc:
-          "账号1：test 密码：123456 <br>账号2：test2 密码：123456 已开放注册！",
-        duration: 10
-      });
-    },
-    showMessage() {
-      this.$Notice.success({
-        title: "已升级至iView3.0",
-        desc: "完善多项功能，包括部门管理、定时任务、前端模版等 修复已知BUG",
-        duration: 5
-      });
+      console.log('wait...');
     }
-  },
-  mounted() {
-    this.showMessage();
-    this.showAccount();
-    this.relatedLogin();
   }
 };
 </script>
