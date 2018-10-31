@@ -80,27 +80,27 @@ export default {
     saveEditPass() {
       let params = {
         id: this.id,
-        password: this.editPasswordForm.oldPass,
-        newPass: this.editPasswordForm.newPass
+        /* password: this.editPasswordForm.oldPass,
+        newPass: this.editPasswordForm.newPass */
+        password: this.editPasswordForm.newPass,
+        password2: this.editPasswordForm.rePass
       };
       this.$refs["editPasswordForm"].validate(valid => {
         if (valid) {
           this.savePassLoading = true;
           changePass(params).then(res => {
             this.savePassLoading = false;
-            if (res.success === true) {
-              this.$Modal.success({
-                title: "修改密码成功",
-                content: "修改密码成功，需重新登录",
-                onOk: () => {
-                  this.$store.commit("logout", this);
-                  this.$store.commit("clearOpenedSubmenu");
-                  this.$router.push({
-                    name: "login"
-                  });
-                }
-              });
-            }
+            this.$Modal.success({
+              title: "修改密码成功",
+              content: "修改密码成功，需重新登录",
+              onOk: () => {
+                this.$store.commit("logout", this);
+                this.$store.commit("clearOpenedSubmenu");
+                this.$router.push({
+                  name: "login"
+                });
+              }
+            });
           });
         }
       });

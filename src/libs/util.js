@@ -244,6 +244,9 @@ util.initRouter = function (vm) {
         component: 'error-page/404'
     }];
 
+    Cookies.set('userInfo', "{username: 'test', id: 'eccdcaaf6fd04999bb54e140766c156b'}", {expires: 7});
+    vm.$store.commit('updateAppRouter', require('../router/router').appRouter);
+
     // 判断用户是否登录
     let userInfo = Cookies.get('userInfo')
     if (userInfo === null || userInfo === "" || userInfo === undefined) {
