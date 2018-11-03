@@ -91,6 +91,7 @@ export default {
     init() {
       let userInfo = JSON.parse(Cookies.get("userInfo"));
       this.username = userInfo.username;
+      return;
       ipInfo().then(res => {
         if (res.success === true) {
           let ipInfo = JSON.parse(res.result);

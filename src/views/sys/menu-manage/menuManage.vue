@@ -271,35 +271,33 @@ export default {
       this.loading = true;
       this.getRequest("/permission/getAllList").then(res => {
         this.loading = false;
-        if (res.success === true) {
-          // 仅展开指定级数 默认所有展开
-          let expandLevel = this.expandLevel;
-          res.result.forEach(function(e) {
-            if (expandLevel === 1) {
-              if (e.level === 1) {
-                e.expand = false;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function(c) {
+        // 仅展开指定级数 默认所有展开
+        let expandLevel = this.expandLevel;
+        res.data.forEach(function(e) {
+          if (expandLevel === 1) {
+            if (e.level === 1) {
+              e.expand = false;
+            }
+            if (e.children && e.children.length > 0) {
+              e.children.forEach(function(c) {
+                if (c.level === 2) {
+                  c.expand = false;
+                }
+              });
+            }
+          } else {
+            if (e.children && e.children.length > 0) {
+              e.children.forEach(function(c) {
+                if (expandLevel === 2) {
                   if (c.level === 2) {
                     c.expand = false;
                   }
-                });
-              }
-            } else {
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function(c) {
-                  if (expandLevel === 2) {
-                    if (c.level === 2) {
-                      c.expand = false;
-                    }
-                  }
-                });
-              }
+                }
+              });
             }
-          });
-          this.data = res.result;
-        }
+          }
+        });
+        this.data = res.data;
       });
     },
     selectTree(v) {
@@ -369,13 +367,25 @@ export default {
             this.menuForm.icon = "";
             this.menuForm.component = "";
           }
-          editPermission(this.menuForm).then(res => {
+          let params = {
+            id: this.menuForm.id,
+            name: this.menuForm.name,
+            sortOrder: this.menuForm.sortOrder,
+            component: this.menuForm.component,
+            path: this.menuForm.path,
+            title: this.menuForm.title,
+            icon: this.menuForm.icon,
+            url: this.menuForm.url,
+            buttonType: this.menuForm.buttonType
+          }
+          editPermission(params).then(res => {
             this.submitLoading = false;
-            if (res.success === true) {
-              this.$Message.success("编辑成功");
-              this.init();
-              this.menuModalVisible = false;
-            }
+            this.$Message.success("编辑成功");
+            this.init();
+            this.menuModalVisible = false;
+          }).catch(err => {
+            this.$Message.error(err.message);
+            this.submitLoading = false;
           });
         }
       });
@@ -404,11 +414,11 @@ export default {
           }
           addPermission(this.menuFormAdd).then(res => {
             this.submitLoading = false;
-            if (res.success === true) {
-              this.$Message.success("添加成功");
-              this.init();
-              this.menuModalVisible = false;
-            }
+            this.$Message.success("添加成功");
+            this.init();
+            this.menuModalVisible = false;
+          }).catch(err => {
+            this.submitLoading = false;
           });
         }
       });
@@ -483,13 +493,11 @@ export default {
           });
           ids = ids.substring(0, ids.length - 1);
           deletePermission(ids).then(res => {
-            if (res.success === true) {
-              this.$Message.success("删除成功");
-              this.selectList = [];
-              this.selectCount = 0;
-              this.canelEdit();
-              this.init();
-            }
+            this.$Message.success("删除成功");
+            this.selectList = [];
+            this.selectCount = 0;
+            this.canelEdit();
+            this.init();
           });
         }
       });

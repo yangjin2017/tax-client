@@ -56,7 +56,7 @@
 
 <script>
 import {
-  getQuartzListData,
+  getCompanyListData,
   addQuartz,
   editQuartz,
   pauseQuartz,
@@ -113,33 +113,32 @@ export default {
         },
         {
           title: "税务识别号码",
-          key: "cronExpression",
-          sortable: true
+          key: "tin",
+          sortable: true,
+          width: 140
         },
         {
           title: "成立日期",
-          key: "parameter",
-          sortable: true
+          key: "establishmentTime",
+          sortable: true,
+          width: 160
         },
         {
           title: "所在国家",
-          key: "description",
-          sortable: true,
-          width: 180
+          key: "countryCode",
+          sortable: true
         },
         {
           title: "币种",
-          key: "description",
-          sortable: true,
-          width: 180
+          key: "currencyCode",
+          sortable: true
         },
         {
           title: "备注",
-          key: "description",
-          sortable: true,
-          width: 180
+          key: "remarks",
+          sortable: true
         },
-        {
+        /* {
           title: "状态",
           key: "status",
           align: "center",
@@ -192,12 +191,12 @@ export default {
               return row.status === -1;
             }
           }
-        },
+        }, */
         {
           title: "操作",
           key: "action",
           align: "center",
-          width: 280,
+          width: 160,
           render: (h, params) => {
             if (params.row.status === 0) {
               return h("div", [
@@ -256,7 +255,7 @@ export default {
               ]);
             } else {
               return h("div", [
-                h(
+                /* h(
                   "Button",
                   {
                     props: {
@@ -274,7 +273,7 @@ export default {
                     }
                   },
                   "恢复执行"
-                ),
+                ), */
                 h(
                   "Button",
                   {
@@ -321,16 +320,16 @@ export default {
   },
   methods: {
     init() {
-      this.getQuartzList();
+      this.getCompanyList();
     },
     changePage(v) {
       this.pageNumber = v;
-      this.getQuartzList();
+      this.getCompanyList();
       this.clearSelectAll();
     },
     changePageSize(v) {
       this.pageSize = v;
-      this.getQuartzList();
+      this.getCompanyList();
     },
     changeSort(e) {
       this.sortColumn = e.key;
@@ -338,22 +337,26 @@ export default {
       if (e.order === "normal") {
         this.sortType = "";
       }
-      this.getQuartzList();
+      this.getCompanyList();
     },
-    getQuartzList() {
+    getCompanyList() {
       this.loading = true;
       let params = {
-        pageNumber: this.pageNumber,
-        pageSize: this.pageSize,
-        sort: this.sortColumn,
-        order: this.sortType
-      };
-      getQuartzListData(params).then(res => {
-        this.loading = false;
-        if (res.success === true) {
-          this.data = res.result.content;
-          this.total = res.result.totalElements;
+        pageVo: {
+          pageNumber: this.pageNumber,
+          pageSize: this.pageSize
+        },
+        companyVo: {
+          name: '',
+          tin: ''
         }
+      };
+      getCompanyListData(params).then(res => {
+        this.loading = false;
+        this.data = res.data.list;
+        this.total = res.data.total;
+      }).catch(() => {
+        this.loading = false;
       });
     },
     cancelSubmit() {
@@ -369,7 +372,7 @@ export default {
               this.submitLoading = false;
               if (res.success === true) {
                 this.$Message.success("操作成功");
-                this.getQuartzList();
+                this.getCompanyList();
                 this.modalVisible = false;
               }
             });
@@ -379,7 +382,7 @@ export default {
               this.submitLoading = false;
               if (res.success === true) {
                 this.$Message.success("操作成功");
-                this.getQuartzList();
+                this.getCompanyList();
                 this.modalVisible = false;
               }
             });
@@ -421,7 +424,7 @@ export default {
             this.operationLoading = false;
             if (res.success === true) {
               this.$Message.success("操作成功");
-              this.getQuartzList();
+              this.getCompanyList();
             }
           });
         }
@@ -437,7 +440,7 @@ export default {
             this.operationLoading = false;
             if (res.success === true) {
               this.$Message.success("操作成功");
-              this.getQuartzList();
+              this.getCompanyList();
             }
           });
         }
@@ -453,7 +456,7 @@ export default {
             this.operationLoading = false;
             if (res.success === true) {
               this.$Message.success("操作成功");
-              this.getQuartzList();
+              this.getCompanyList();
             }
           });
         }
@@ -486,7 +489,7 @@ export default {
             if (res.success === true) {
               this.$Message.success("删除成功");
               this.clearSelectAll();
-              this.getQuartzList();
+              this.getCompanyList();
             }
           });
         }

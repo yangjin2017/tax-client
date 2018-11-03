@@ -254,7 +254,7 @@ export default {
     init() {
       this.getRoleList();
       // 获取所有菜单权限树
-      // this.getPermList();
+      this.getPermList();
     },
     changePage(v) {
       this.pageNumber = v;
@@ -283,18 +283,20 @@ export default {
       };
       getAllRoleList(params).then(res => {
         this.loading = false;
-        this.data = res.data;
-        this.total = res.data.length;
+        this.data = res.data.list;
+        this.total = res.data.total;
+      }).catch(err => {
+        this.loading = false;
       });
     },
     getPermList() {
       this.treeLoading = true;
       getAllPermissionList().then(res => {
         this.treeLoading = false;
-        if (res.success === true) {
-          this.deleteDisableNode(res.result);
-          this.permData = res.result;
-        }
+        this.deleteDisableNode(res.data);
+        this.permData = res.data;
+      }).catch(err => {
+        this.treeLoading = false;
       });
     },
     // 递归标记禁用节点
@@ -504,15 +506,14 @@ export default {
         permIds += e.id + ",";
       });
       permIds = permIds.substring(0, permIds.length - 1);
-      editRolePerm(this.editRolePermId, {
-        permIds: permIds
+      editRolePerm({
+        roleId: this.editRolePermId,
+        permissionIds: permIds
       }).then(res => {
         this.submitPermLoading = false;
-        if (res.success === true) {
-          this.$Message.success("操作成功");
-          this.getRoleList();
-          this.permModalVisible = false;
-        }
+        this.$Message.success("操作成功");
+        this.getRoleList();
+        this.permModalVisible = false;
       });
     },
     cancelPermEdit() {

@@ -7,7 +7,7 @@ import Cookies from 'js-cookie';
 // let base = '/xboot';
 let base = '/api';
 // 超时设定
-axios.defaults.timeout = 15000;
+// axios.defaults.timeout = 15000;
 
 axios.interceptors.request.use(config => {
     return config;
@@ -74,23 +74,32 @@ export const getRequest = (url, params) => {
     });
 };
 
-export const postRequest = (url, params) => {
+export const formPostRequest = (url, params) => {
     let accessToken = getStore("accessToken");
     return axios({
         method: 'post',
         url: `${base}${url}`,
         data: params,
-        // transformRequest: [function (data) {
-        //     let ret = '';
-        //     for (let it in data) {
-        //         ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&';
-        //     }
-        //     return ret;
-        // }],
-        // headers: {
-        //     // 'Content-Type': 'application/x-www-form-urlencoded',
-        //     'accessToken': accessToken
-        // }
+        transformRequest: [function (data) {
+            let ret = '';
+            for (let it in data) {
+                ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&';
+            }
+            return ret;
+        }],
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'accessToken': accessToken
+        }
+    });
+}
+
+export const postRequest = (url, params) => {
+    let accessToken = getStore("accessToken");
+    return axios({
+        method: 'post',
+        url: `${base}${url}`,
+        data: params
     });
 };
 

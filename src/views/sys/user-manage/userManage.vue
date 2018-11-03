@@ -8,8 +8,8 @@
                 <Card>
                     <Row>
                         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-                            <Form-item label="用户名称" prop="userName">
-                              <Input type="text" v-model="searchForm.userName" clearable placeholder="请输入用户名" style="width: 200px"/>
+                            <Form-item label="用户名称" prop="username">
+                              <Input type="text" v-model="searchForm.username" clearable placeholder="请输入用户名" style="width: 200px"/>
                             </Form-item>
                             <Form-item label="部门" prop="department">
                               <Cascader v-model="selectDep" :data="department" :load-data="loadData" @on-change="handleChangeDep" change-on-select filterable placeholder="请选择或输入搜索部门" style="width: 200px"></Cascader>
@@ -86,8 +86,8 @@
         </Row>
         <Modal :title="modalTitle" v-model="userModalVisible" :mask-closable='false' :width="500" :styles="{top: '30px'}">
             <Form ref="userForm" :model="userForm" :label-width="70" :rules="userFormValidate">
-                <FormItem label="用户名" prop="userName">
-                    <Input v-model="userForm.userName" autocomplete="off"/>
+                <FormItem label="用户名" prop="username">
+                    <Input v-model="userForm.username" autocomplete="off"/>
                 </FormItem>
                 <FormItem label="密码" prop="password" v-if="modalType===0" :error="errorPass">
                     <Input type="password" v-model="userForm.password" autocomplete="off"/>
@@ -230,7 +230,7 @@ export default {
       selectDep: [],
       dataDep: [],
       searchForm: {
-        userName: "",
+        username: "",
         departmentId: "",
         tel: "",
         email: "",
@@ -249,7 +249,7 @@ export default {
       userModalVisible: false,
       modalTitle: "",
       userForm: {
-        userName: '',
+        username: '',
         password: '',
         workNumber: null,
         /* sex: 1,
@@ -263,7 +263,7 @@ export default {
       roleList: [],
       errorPass: "",
       userFormValidate: {
-        userName: [
+        username: [
           { required: true, message: "账号不能为空", trigger: "blur" }
         ],
         tel: [
@@ -298,7 +298,7 @@ export default {
         },
         {
           title: "用户名",
-          key: "userName",
+          key: "username",
           width: 145,
           // sortable: true
         },
@@ -556,7 +556,7 @@ export default {
       exportColumns: [
         {
           title: "用户名",
-          key: "userName"
+          key: "username"
         },
         {
           title: "头像",
@@ -610,12 +610,15 @@ export default {
   },
   methods: {
     init() {
-      /* this.accessToken = {
+      this.accessToken = {
         accessToken: this.getStore("accessToken")
-      }; */
+      };
       // this.initDepartmentData();
       this.getUserList();
       // this.initDepartmentTreeData();
+    },
+    initCompany() {
+      
     },
     initDepartmentData() {
       initDepartment().then(res => {
@@ -750,7 +753,25 @@ export default {
     getUserList() {
       // 多条件搜索用户列表
       this.loading = true;
-      getUserListData(this.searchForm).then(res => {
+      let params = {
+        pageVo: {
+          pageNumber: this.searchForm.pageNumber,
+          pageSize: this.searchForm.pageSize
+        },
+        userVo: {
+          username: this.searchForm.username,
+          sex: this.searchForm.sex,
+          tel: this.searchForm.tel,
+          email: this.searchForm.email,
+          realName: this.searchForm.realName,
+          workNumber: this.searchForm.workNumber
+        },
+        searchVo: {
+          startDate: this.searchForm.startDate,
+          endDate: this.searchForm.endDate
+        }
+      }
+      getUserListData(params).then(res => {
         this.loading = false;
         this.data = res.data.list;
         this.total = res.data.total;
@@ -928,7 +949,7 @@ export default {
     enable(v) {
       this.$Modal.confirm({
         title: "确认启用",
-        content: "您确认要启用用户 " + v.userName + " ?",
+        content: "您确认要启用用户 " + v.username + " ?",
         onOk: () => {
           this.operationLoading = true;
           enableUser(v.id).then(res => {
@@ -944,7 +965,7 @@ export default {
     disable(v) {
       this.$Modal.confirm({
         title: "确认禁用",
-        content: "您确认要禁用用户 " + v.userName + " ?",
+        content: "您确认要禁用用户 " + v.username + " ?",
         onOk: () => {
           this.operationLoading = true;
           disableUser(v.id).then(res => {
@@ -960,7 +981,7 @@ export default {
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
-        content: "您确认要删除用户 " + v.userName + " ?",
+        content: "您确认要删除用户 " + v.username + " ?",
         onOk: () => {
           this.operationLoading = true;
           deleteUser(v.id).then(res => {

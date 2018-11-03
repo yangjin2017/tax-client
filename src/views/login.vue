@@ -120,7 +120,7 @@ export default {
       maxLength: 6,
       errorCode: "",
       form: {
-        username: "test",
+        username: "admin",
         password: "123456",
         mobile: "捐赠获取完整版功能",
         code: ""
@@ -186,45 +186,63 @@ export default {
           if (valid) {
             this.loading = true;
             login({
-              userName: this.form.username,
+              username: this.form.username,
               password: this.form.password,
               saveLogin: this.saveLogin
             }).then(res => {
+              this.setStore("accessToken", res.token);
+
               // TODO: 暂时跳过获取用户信息
-              Cookies.set('userInfo', "{username: 'test'}", {expires: 7});
+              var res = {
+                result: {username: 'admin', id: '682265633886208'},
+                avatar: 'https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3841743209,952064471&fm=27&gp=0.jpg'
+              }
+              if (this.saveLogin) {
+                // 保存7天
+                Cookies.set("userInfo", JSON.stringify(res.result), {
+                  expires: 7
+                });
+              } else {
+                Cookies.set("userInfo", JSON.stringify(res.result));
+              }
+              this.setStore("userInfo", res.result);
+              this.$store.commit("setAvatarPath", res.result.avatar);
+              // 加载菜单
+              util.initRouter(this);
               this.$router.push({
                 name: "home_index"
               });
+              return;
               // TODO:
-              if (res.success === true) {
-                this.setStore("accessToken", res.result);
-                // 获取用户信息
-                userInfo().then(res => {
-                  if (res.success === true) {
-                    // 避免超过大小限制
-                    delete res.result.permissions;
-                    if (this.saveLogin) {
-                      // 保存7天
-                      Cookies.set("userInfo", JSON.stringify(res.result), {
-                        expires: 7
-                      });
-                    } else {
-                      Cookies.set("userInfo", JSON.stringify(res.result));
-                    }
-                    this.setStore("userInfo", res.result);
-                    this.$store.commit("setAvatarPath", res.result.avatar);
-                    // 加载菜单
-                    util.initRouter(this);
-                    this.$router.push({
-                      name: "home_index"
+
+
+              // 获取用户信息
+              userInfo().then(res => {
+                if (res.success === true) {
+                  // 避免超过大小限制
+                  delete res.result.permissions;
+                  if (this.saveLogin) {
+                    // 保存7天
+                    Cookies.set("userInfo", JSON.stringify(res.result), {
+                      expires: 7
                     });
                   } else {
-                    this.loading = false;
+                    Cookies.set("userInfo", JSON.stringify(res.result));
                   }
-                });
-              } else {
-                this.loading = false;
-              }
+                  this.setStore("userInfo", res.result);
+                  this.$store.commit("setAvatarPath", res.result.avatar);
+                  // 加载菜单
+                  util.initRouter(this);
+                  this.$router.push({
+                    name: "home_index"
+                  });
+                } else {
+                  this.loading = false;
+                }
+              });
+            }).catch(err => {
+              this.loading = false;
+              this.showErrorMsg(err.errMsg);
             });
           }
         });

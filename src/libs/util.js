@@ -244,9 +244,6 @@ util.initRouter = function (vm) {
         component: 'error-page/404'
     }];
 
-    Cookies.set('userInfo', "{username: 'test', id: 'eccdcaaf6fd04999bb54e140766c156b'}", {expires: 7});
-    vm.$store.commit('updateAppRouter', require('../router/router').appRouter);
-
     // 判断用户是否登录
     let userInfo = Cookies.get('userInfo')
     if (userInfo === null || userInfo === "" || userInfo === undefined) {
@@ -256,8 +253,8 @@ util.initRouter = function (vm) {
     let userId = JSON.parse(Cookies.get("userInfo")).id;
     let accessToken = window.localStorage.getItem('accessToken')
     // 加载菜单
-    axios.get("/xboot/permission/getMenuList/" + userId, {headers: {'accessToken': accessToken}}).then(res => {
-        let menuData = res.result;
+    axios.get("/api/permission/getMenuList/" + userId, {headers: {'accessToken': accessToken}}).then(res => {
+        let menuData = res.data;
         if (menuData === null || menuData === "" || menuData === undefined) {
             return;
         }

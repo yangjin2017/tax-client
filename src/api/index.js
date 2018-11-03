@@ -1,9 +1,9 @@
 // 统一请求路径前缀在libs/axios.js中修改
-import { getRequest, postRequest, putRequest, deleteRequest, uploadFileRequest } from '@/libs/axios';
+import { getRequest, formPostRequest, postRequest, putRequest, deleteRequest, uploadFileRequest } from '@/libs/axios';
 
 // 登陆
 export const login = (params) => {
-    return postRequest('/user/login', params)
+    return formPostRequest('/login', params)
 }
 // 获取用户登录信息
 export const userInfo = (params) => {
@@ -80,7 +80,10 @@ export const getRelatedListData = (params) => {
     return getRequest('/relate/findByCondition', params)
 }
 
-
+// 获取公司列表
+export const getCompanyListData = params => {
+    return postRequest('/company/getAll', params)
+}
 
 // 获取用户数据 多条件
 export const getUserListData = (params) => {
@@ -138,7 +141,7 @@ export const deleteDepartment = (ids, params) => {
 
 // 获取全部角色数据
 export const getAllRoleList = (params) => {
-    return getRequest('/role/all', params)
+    return postRequest('/role/all/page', params)
 }
 // 分页获取角色数据
 export const getRoleList = (params) => {
@@ -157,8 +160,11 @@ export const setDefaultRole = (params) => {
     return postRequest('/role/setDefault', params)
 }
 // 分配角色权限
-export const editRolePerm = (id, params) => {
+/* export const editRolePerm = (id, params) => {
     return postRequest(`/role/editRolePerm/${id}`, params)
+} */
+export const editRolePerm = (params) => {
+    return postRequest(`/role/assignPermission`, params)
 }
 // 删除角色
 export const deleteRole = (ids, params) => {
@@ -169,7 +175,7 @@ export const deleteRole = (ids, params) => {
 
 // 获取全部权限数据
 export const getAllPermissionList = (params) => {
-    return postRequest('/permission/getAllList', params)
+    return getRequest('/permission/getAllList', params)
 }
 // 添加权限
 export const addPermission = (params) => {
