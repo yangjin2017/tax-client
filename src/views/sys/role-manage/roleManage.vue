@@ -387,10 +387,10 @@ export default {
           this.operationLoading = true;
           setDefaultRole(params).then(res => {
             this.operationLoading = false;
-            if (res.success === true) {
-              this.$Message.success("操作成功");
-              this.getRoleList();
-            }
+            this.$Message.success("操作成功");
+            this.getRoleList();
+          }).catch(() => {
+            this.operationLoading = false;
           });
         }
       });
@@ -407,10 +407,10 @@ export default {
           this.operationLoading = true;
           setDefaultRole(params).then(res => {
             this.operationLoading = false;
-            if (res.success === true) {
-              this.$Message.success("操作成功");
-              this.getRoleList();
-            }
+            this.$Message.success("操作成功");
+            this.getRoleList();
+          }).catch(() => {
+            this.operationLoading = false;
           });
         }
       });

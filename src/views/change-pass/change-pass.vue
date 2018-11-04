@@ -80,10 +80,8 @@ export default {
     saveEditPass() {
       let params = {
         id: this.id,
-        /* password: this.editPasswordForm.oldPass,
-        newPass: this.editPasswordForm.newPass */
-        password: this.editPasswordForm.newPass,
-        password2: this.editPasswordForm.rePass
+        password: this.editPasswordForm.oldPass,
+        newPass: this.editPasswordForm.newPass
       };
       this.$refs["editPasswordForm"].validate(valid => {
         if (valid) {
