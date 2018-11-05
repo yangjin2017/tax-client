@@ -118,11 +118,11 @@ export const deleteUser = (ids, params) => {
 
 // 获取一级部门
 export const initDepartment = (params) => {
-    return getRequest('/department/getByParentId/0', params)
+    return getRequest('/department/getAll/0', params)
 }
 // 加载部门子级数据
 export const loadDepartment = (id, params) => {
-    return getRequest(`/department/getByParentId/${id}`, params)
+    return getRequest(`/department/getAll/${id}`, params)
 }
 // 添加部门
 export const addDepartment = (params) => {
@@ -134,7 +134,7 @@ export const editDepartment = (params) => {
 }
 // 删除部门
 export const deleteDepartment = (ids, params) => {
-    return deleteRequest(`/department/delByIds/${ids}`, params)
+    return deleteRequest(`/department/del/${ids}`, params)
 }
 
 

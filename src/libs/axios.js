@@ -22,8 +22,10 @@ axios.interceptors.response.use(response => {
 
     switch (data.status) {
         case '0':
+            data.success = true;
             return data;
         default:
+            data.success = false;
             return Promise.reject(data);
     }
 

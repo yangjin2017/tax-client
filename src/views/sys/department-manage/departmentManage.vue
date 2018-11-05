@@ -7,7 +7,7 @@
           <Row class="operation">
             <Button @click="add" type="primary" icon="md-add">添加子部门</Button>
             <Button @click="addRoot" icon="md-add">添加一级部门</Button>
-            <Button @click="delAll" icon="md-trash">批量删除</Button>
+            <Button @click="delAll" icon="md-trash">删除</Button>
             <Button @click="getParentList" icon="md-refresh">刷新</Button>
           </Row>
           <Row type="flex" justify="start" class="code-row-bg">
@@ -16,7 +16,7 @@
                 当前选择编辑： <span class="select-count">{{editTitle}}</span>
                 <a class="select-clear" v-if="form.id" @click="canelEdit">取消选择</a>
               </Alert>
-              <Tree :data="data" :load-data="loadData" show-checkbox @on-check-change="changeSelect" @on-select-change="selectTree"></Tree>
+              <Tree ref="tree" :data="data" :load-data="loadData" :show-checkbox="false" @on-check-change="changeSelect" :multiple="false" @on-select-change="selectTree"></Tree>
               <Spin size="large" fix v-if="loading"></Spin>
             </Col>
             <Col span="9">
@@ -33,7 +33,7 @@
                 <FormItem label="部门名称" prop="title">
                   <Input v-model="form.title"/>
                 </FormItem>
-                <FormItem label="排序值" prop="sortOrder">
+                <!-- <FormItem label="排序值" prop="sortOrder">
                   <InputNumber :max="1000" :min="0" v-model="form.sortOrder"></InputNumber>
                   <span style="margin-left:5px">值越小越靠前，支持小数</span>
                 </FormItem>
@@ -42,7 +42,7 @@
                     <span slot="open">启用</span>
                     <span slot="close">禁用</span>
                   </i-switch>
-                </FormItem>
+                </FormItem> -->
                 <Form-item>
                   <Button style="margin-right:5px" @click="submitEdit" :loading="submitLoading" type="primary" icon="ios-create-outline">修改并保存</Button>
                   <Button @click="handleReset" >重置</Button>
@@ -125,53 +125,56 @@ export default {
       this.getParentList();
       this.getParentListEdit();
     },
+    initData(data) {
+      data.forEach(e => {
+        e.title = e.name;
+        e.isParent = e.parentId === '0';
+      })
+    },
     getParentList() {
       this.loading = true;
       initDepartment().then(res => {
         this.loading = false;
-        if (res.success === true) {
-          res.result.forEach(function(e) {
-            if (e.isParent) {
-              e.loading = false;
-              e.children = [];
-            }
-          });
-          this.data = res.result;
-        }
+        this.initData(res.data);
+        res.data.forEach(function(e) {
+          if (e.isParent) {
+            e.loading = false;
+            e.children = [];
+          }
+        });
+        this.data = res.data;
       });
     },
     getParentListEdit() {
       this.loadingEdit = true;
       initDepartment().then(res => {
         this.loadingEdit = false;
-        if (res.success === true) {
-          res.result.forEach(function(e) {
-            if (e.isParent) {
-              e.loading = false;
-              e.children = [];
-            }
-          });
-          // 头部加入一级
-          let first = {
-            id: "0",
-            title: "一级部门"
-          };
-          res.result.unshift(first);
-          this.dataEdit = res.result;
-        }
+        this.initData(res.data);
+        res.data.forEach(function(e) {
+          if (e.isParent) {
+            e.loading = false;
+            e.children = [];
+          }
+        });
+        // 头部加入一级
+        let first = {
+          id: "0",
+          title: "一级部门"
+        };
+        res.data.unshift(first);
+        this.dataEdit = res.data;
       });
     },
     loadData(item, callback) {
       loadDepartment(item.id).then(res => {
-        if (res.success === true) {
-          res.result.forEach(function(e) {
-            if (e.isParent) {
-              e.loading = false;
-              e.children = [];
-            }
-          });
-          callback(res.result);
-        }
+        this.initData(res.data);
+        res.data.forEach(function(e) {
+          if (e.isParent) {
+            e.loading = false;
+            e.children = [];
+          }
+        });
+        callback(res.data);
       });
     },
     selectTree(v) {
@@ -243,13 +246,12 @@ export default {
           if (this.form.buttonType === null) {
             this.form.buttonType = "";
           }
+          this.form.name = this.form.title;
           editDepartment(this.form).then(res => {
             this.submitLoading = false;
-            if (res.success === true) {
-              this.$Message.success("编辑成功");
-              this.init();
-              this.menuModalVisible = false;
-            }
+            this.$Message.success("编辑成功");
+            this.init();
+            this.menuModalVisible = false;
           });
         }
       });
@@ -271,13 +273,14 @@ export default {
           if (this.formAdd.buttonType === null) {
             this.formAdd.buttonType = "";
           }
+          this.formAdd.name = this.formAdd.title;
           addDepartment(this.formAdd).then(res => {
             this.submitLoading = false;
-            if (res.success === true) {
-              this.$Message.success("添加成功");
-              this.init();
-              this.menuModalVisible = false;
-            }
+            this.$Message.success("添加成功");
+            this.init();
+            this.menuModalVisible = false;
+          }).catch(() => {
+            this.submitLoading = false;
           });
         }
       });
@@ -311,27 +314,28 @@ export default {
       this.selectList = v;
     },
     delAll() {
-      if (this.selectCount <= 0) {
+      let checkeds = this.$refs.tree.getSelectedNodes();
+      if (checkeds.length == 0) {
         this.$Message.warning("您还未勾选要删除的数据");
         return;
       }
+      let checked = checkeds[0];
       this.$Modal.confirm({
         title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 条数据?",
+        content: "您确认要删除所选的 " + checked.name,
         onOk: () => {
-          let ids = "";
+          /* let ids = "";
           this.selectList.forEach(function(e) {
             ids += e.id + ",";
           });
-          ids = ids.substring(0, ids.length - 1);
+          ids = ids.substring(0, ids.length - 1); */
+          let ids = checked.id;
           deleteDepartment(ids).then(res => {
-            if (res.success === true) {
-              this.$Message.success("删除成功");
-              this.selectList = [];
-              this.selectCount = 0;
-              this.canelEdit();
-              this.init();
-            }
+            this.$Message.success("删除成功");
+            this.selectList = [];
+            this.selectCount = 0;
+            this.canelEdit();
+            this.init();
           });
         }
       });
