@@ -84,6 +84,39 @@ export const getRelatedListData = (params) => {
 export const getCompanyListData = params => {
     return postRequest('/company/getAll', params)
 }
+// 添加公司
+export const addCompany = params => {
+    return postRequest('/company/add', params)
+}
+// 编辑公司
+export const editCompany = params => {
+    return postRequest('/company/edit', params)
+}
+// 编辑公司
+export const deleteCompany = (id, params) => {
+    return deleteRequest(`company/del/${id}`, params)
+}
+
+// 获取字典列表
+export const getDictListData = params => {
+    return postRequest('/dict/getAllPage', params)
+}
+// 添加字典
+export const addDict = params => {
+    return postRequest('/dict/add', params)
+}
+// 编辑字典
+export const editDict = params => {
+    return postRequest('/dict/edit', params)
+}
+// 编辑字典
+export const deleteDict = (id, params) => {
+    return deleteRequest(`/dict/del/${id}`, params)
+}
+// 通过类型查询字典集合
+export const getDictListDataByType = (typeId, params) => {
+    return getRequest(`/dict/getByType/${typeId}`, params)
+}
 
 // 获取用户数据 多条件
 export const getUserListData = (params) => {

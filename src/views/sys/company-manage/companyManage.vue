@@ -8,16 +8,16 @@
                 <Card>     
                     <Row class="operation">
                         <Button @click="addCompany" type="primary" icon="md-add">新增公司</Button>
-                        <Button @click="delAll" icon="md-trash">批量删除</Button>
+                        <!-- <Button @click="delAll" icon="md-trash">批量删除</Button> -->
                         <Button @click="init" icon="md-refresh">刷新</Button>
                         <circleLoading v-if="operationLoading"/>
                     </Row>
-                     <Row>
+                    <!-- <Row>
                         <Alert show-icon>
                             已选择 <span class="select-count">{{selectCount}}</span> 项
                             <a class="select-clear" @click="clearSelectAll">清空</a>
                         </Alert>
-                    </Row>
+                    </Row> -->
                     <Row>
                         <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
                     </Row>
@@ -28,27 +28,26 @@
             </Col>
         </Row>
         <Modal :title="modalTitle" v-model="modalVisible" :mask-closable='false' :width="500">
-          <Form ref="form" :model="form" :label-width="80" :rules="formValidate">
-            <FormItem label="任务类名" prop="jobClassName">
-              <Input v-model="form.jobClassName" placeholder="例如 cn.exrick.xboot.quartz.jobs.Job" clearable/>
+          <Form ref="form" :model="form" :label-width="120" :rules="formValidate">
+            <FormItem label="公司名称" prop="name">
+              <Input v-model="form.name" placeholder="请输入公司名称" clearable/>
             </FormItem>
-            <FormItem label="cron表达式" prop="cronExpression" style="margin-bottom: 5px;">
-              <Input v-model="form.cronExpression" clearable/>
-              <a target="_blank" href="http://cron.qqe2.com/">
-                <Icon type="md-arrow-dropright-circle" size="16" style="margin:0 3px 3px 0;"/> 
-                在线cron表达式生成
-              </a>
+            <FormItem label="税务识别号码" prop="tin">
+              <Input v-model="form.tin" clearable/>
             </FormItem>
-            <FormItem label="参数" prop="parameter">
-              <Input v-model="form.parameter"/>
+            <FormItem label="所属国家" prop="countryCode">
+              <Input v-model="form.countryCode"/>
             </FormItem>
-            <FormItem label="备注" prop="description">
-              <Input v-model="form.description"/>
+            <FormItem label="币种" prop="currencyCode">
+              <Input v-model="form.currencyCode"/>
+            </FormItem>
+            <FormItem label="备注" prop="remarks">
+              <Input v-model="form.remarks"/>
             </FormItem>
           </Form>
           <div slot="footer">
             <Button type="text" @click="cancelSubmit">取消</Button>
-            <Button type="primary" :loading="submitLoading" @click="handleSubmit">保存并安排</Button>
+            <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
           </div>
         </Modal>
     </div>
@@ -57,15 +56,13 @@
 <script>
 import {
   getCompanyListData,
-  addQuartz,
-  editQuartz,
-  pauseQuartz,
-  resumeQuartz,
-  deleteQuartz
+  addCompany,
+  editCompany,
+  deleteCompany
 } from "@/api/index";
 import circleLoading from "../../my-components/circle-loading.vue";
 export default {
-  name: "quartz-manage",
+  name: "company-manage",
   components: {
     circleLoading
   },
@@ -79,16 +76,24 @@ export default {
       modalVisible: false,
       modalTitle: "",
       form: {
-        id: "",
-        paramter: "",
-        description: ""
+        name: "",
+        tin: "",
+        countryCode: "",
+        currencyCode: "",
+        remarks: ""
       },
       formValidate: {
-        jobClassName: [
-          { required: true, message: "任务类名不能为空", trigger: "blur" }
+        name: [
+          { required: true, message: "公司名称不能为空", trigger: "blur" }
         ],
-        cronExpression: [
-          { required: true, message: "cron表达式不能为空", trigger: "blur" }
+        tin: [
+          { required: true, message: "税务识别编号不能为空", trigger: "blur" }
+        ],
+        countryCode: [
+          { required: true, message: "所属国家不能为空", trigger: "blur" }
+        ],
+        currencyCode: [
+          { required: true, message: "币种不能为空", trigger: "blur" }
         ]
       },
       submitLoading: false,
@@ -124,7 +129,7 @@ export default {
           width: 160
         },
         {
-          title: "所在国家",
+          title: "所属国家",
           key: "countryCode",
           sortable: true
         },
@@ -198,7 +203,7 @@ export default {
           align: "center",
           width: 160,
           render: (h, params) => {
-            if (params.row.status === 0) {
+            /* if (params.row.status === 0) {
               return h("div", [
                 h(
                   "Button",
@@ -253,7 +258,7 @@ export default {
                   "删除"
                 )
               ]);
-            } else {
+            } else { */
               return h("div", [
                 /* h(
                   "Button",
@@ -308,7 +313,7 @@ export default {
                   "删除"
                 )
               ]);
-            }
+            // }
           }
         }
       ],
@@ -368,23 +373,23 @@ export default {
           if (this.modalType === 0) {
             // 添加
             this.submitLoading = true;
-            addQuartz(this.form).then(res => {
+            addCompany(this.form).then(res => {
               this.submitLoading = false;
-              if (res.success === true) {
-                this.$Message.success("操作成功");
-                this.getCompanyList();
-                this.modalVisible = false;
-              }
+              this.$Message.success("操作成功");
+              this.getCompanyList();
+              this.modalVisible = false;
+            }).catch(() => {
+              this.submitLoading = false;
             });
           } else {
             this.submitLoading = true;
-            editQuartz(this.form).then(res => {
+            editCompany(this.form).then(res => {
               this.submitLoading = false;
-              if (res.success === true) {
-                this.$Message.success("操作成功");
-                this.getCompanyList();
-                this.modalVisible = false;
-              }
+              this.$Message.success("操作成功");
+              this.getCompanyList();
+              this.modalVisible = false;
+            }).catch(() => {
+              this.submitLoading = false;
             });
           }
         }
@@ -392,17 +397,20 @@ export default {
     },
     addCompany() {
       this.modalType = 0;
-      this.modalTitle = "添加任务";
+      this.modalTitle = "添加公司";
       this.$refs.form.resetFields();
       (this.form = {
-        paramter: "",
-        description: ""
+        name: "",
+        tin: "",
+        countryCode: "",
+        currencyCode: "",
+        remarks: ""
       }),
         (this.modalVisible = true);
     },
     edit(v) {
       this.modalType = 1;
-      this.modalTitle = "编辑任务";
+      this.modalTitle = "编辑公司";
       // 转换null为""
       for (let attr in v) {
         if (v[attr] === null) {
@@ -414,50 +422,18 @@ export default {
       this.form = data;
       this.modalVisible = true;
     },
-    pause(v) {
-      this.$Modal.confirm({
-        title: "确认停止",
-        content: "您确认要停止任务 " + v.jobClassName + " ?",
-        onOk: () => {
-          this.operationLoading = true;
-          pauseQuartz(v).then(res => {
-            this.operationLoading = false;
-            if (res.success === true) {
-              this.$Message.success("操作成功");
-              this.getCompanyList();
-            }
-          });
-        }
-      });
-    },
-    resume(v) {
-      this.$Modal.confirm({
-        title: "确认恢复",
-        content: "您确认要恢复任务 " + v.jobClassName + " ?",
-        onOk: () => {
-          this.operationLoading = true;
-          resumeQuartz(v).then(res => {
-            this.operationLoading = false;
-            if (res.success === true) {
-              this.$Message.success("操作成功");
-              this.getCompanyList();
-            }
-          });
-        }
-      });
-    },
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
-        content: "您确认要删除任务 " + v.jobClassName + " ?",
+        content: "您确认要删除公司 " + v.name + " ?",
         onOk: () => {
           this.operationLoading = true;
-          deleteQuartz(v.id).then(res => {
+          deleteCompany(v.id).then(res => {
             this.operationLoading = false;
-            if (res.success === true) {
-              this.$Message.success("操作成功");
-              this.getCompanyList();
-            }
+            this.$Message.success("操作成功");
+            this.getCompanyList();
+          }).catch(() => {
+            this.operationLoading = false;
           });
         }
       });
