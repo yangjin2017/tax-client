@@ -80,9 +80,12 @@ export const getRelatedListData = (params) => {
     return getRequest('/relate/findByCondition', params)
 }
 
+export const getAllCompany = params => {
+    return getRequest('/company/getAll', params)
+}
 // 获取公司列表
 export const getCompanyListData = params => {
-    return postRequest('/company/getAll', params)
+    return postRequest('/company/getAllPage', params)
 }
 // 添加公司
 export const addCompany = params => {
@@ -174,11 +177,11 @@ export const deleteDepartment = (ids, params) => {
 
 // 获取全部角色数据
 export const getAllRoleList = (params) => {
-    return postRequest('/role/all/page', params)
+    return getRequest('/role/all', params)
 }
 // 分页获取角色数据
 export const getRoleList = (params) => {
-    return getRequest('/role/getAllByPage', params)
+    return postRequest('/role/all/page', params)
 }
 // 添加角色
 export const addRole = (params) => {
@@ -227,7 +230,8 @@ export const deletePermission = (ids, params) => {
 
 // 分页获取日志数据
 export const getLogListData = (params) => {
-    return getRequest('/log/getAllByPage', params)
+    // return getRequest('/log/getAllByPage', params)
+    return postRequest('/logInfo/allPage', params)
 }
 // 搜索获取日志数据
 export const getSearchLogData = (params) => {

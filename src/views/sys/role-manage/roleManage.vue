@@ -55,7 +55,7 @@
 
 <script>
 import {
-  getAllRoleList,
+  getRoleList,
   getAllPermissionList,
   addRole,
   editRole,
@@ -281,7 +281,7 @@ export default {
         sort: this.sortColumn,
         order: this.sort
       };
-      getAllRoleList(params).then(res => {
+      getRoleList(params).then(res => {
         this.loading = false;
         this.data = res.data.list;
         this.total = res.data.total;

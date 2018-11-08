@@ -36,10 +36,14 @@
               <Input v-model="form.tin" clearable/>
             </FormItem>
             <FormItem label="所属国家" prop="countryCode">
-              <Input v-model="form.countryCode"/>
+              <Select v-model="form.countryCode" style="width:200px">
+                <Option v-for="item in dictCountrys" :value="item.code" :key="item.id">{{ item.name }}</Option>
+              </Select>
             </FormItem>
             <FormItem label="币种" prop="currencyCode">
-              <Input v-model="form.currencyCode"/>
+              <Select v-model="form.currencyCode" style="width:200px">
+                <Option v-for="item in dictCurrencys" :value="item.code" :key="item.id">{{ item.name }}</Option>
+              </Select>
             </FormItem>
             <FormItem label="备注" prop="remarks">
               <Input v-model="form.remarks"/>
@@ -58,8 +62,10 @@ import {
   getCompanyListData,
   addCompany,
   editCompany,
-  deleteCompany
+  deleteCompany,
+  getDictListDataByType
 } from "@/api/index";
+import { dictType } from '@/libs/constance.js'
 import circleLoading from "../../my-components/circle-loading.vue";
 export default {
   name: "company-manage",
@@ -320,12 +326,15 @@ export default {
       data: [],
       pageNumber: 1,
       pageSize: 10,
-      total: 0
+      total: 0,
+      dictCountrys: [],
+      dictCurrencys: []
     };
   },
   methods: {
     init() {
       this.getCompanyList();
+      this.getDictData();
     },
     changePage(v) {
       this.pageNumber = v;
@@ -470,6 +479,17 @@ export default {
           });
         }
       });
+    },
+    /* 获取字典信息 */
+    getDictData() {
+      getDictListDataByType(dictType.country)
+        .then(res => {
+          this.dictCountrys = res.data;
+        });
+      getDictListDataByType(dictType.currency)
+        .then(res => {
+          this.dictCurrencys = res.data;
+        });
     }
   },
   mounted() {

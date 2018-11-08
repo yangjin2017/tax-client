@@ -128,7 +128,13 @@
                           class="upload">
                     <Button icon="ios-cloud-upload-outline">上传图片</Button>
                   </Upload>
-                </Form-item>
+                </Form-item> -->
+                <FormItem label="所属公司" prop="companys">
+                  <Select v-model="userForm.companys" multiple>
+                      <Option v-for="item in companyList" :value="item.id" :key="item.id" :label="item.name">
+                      </Option>
+                  </Select>
+                </FormItem>
                 <Form-item label="所属部门" prop="departmentTitle">
                   <Poptip trigger="click" placement="right" title="选择部门" width="250">
                     <div style="display:flex;">
@@ -141,12 +147,12 @@
                     </div>
                   </Poptip>
                 </Form-item>
-                <FormItem label="用户类型" prop="type">
+                <!-- <FormItem label="用户类型" prop="type">
                   <Select v-model="userForm.type" placeholder="请选择">
                     <Option :value="0">普通用户</Option>
                     <Option :value="1">管理员</Option>
                   </Select>
-                </FormItem>
+                </FormItem> -->
                 <FormItem label="角色分配" prop="roles">
                   <Select v-model="userForm.roles" multiple>
                       <Option v-for="item in roleList" :value="item.id" :key="item.id" :label="item.name">
@@ -154,9 +160,9 @@
                         <!-- <span style="margin-right:10px;">{{ item.name }}</span>
                         <span style="color:#ccc;">{{ item.description }}</span> -->
                         <!-- </div> -->
-                      <!--</Option>
+                      </Option>
                   </Select>
-                </FormItem> -->
+                </FormItem>
             </Form>
             <div slot="footer">
                 <Button type="text" @click="cancelUser">取消</Button>
@@ -185,6 +191,7 @@ import {
   loadDepartment,
   getUserListData,
   getAllRoleList,
+  getAllCompany,
   addUser,
   editUser,
   enableUser,
@@ -254,13 +261,15 @@ export default {
         workNumber: null,
         /* sex: 1,
         type: 0,
-        avatar: "https://s1.ax1x.com/2018/05/19/CcdVQP.png",
+        avatar: "https://s1.ax1x.com/2018/05/19/CcdVQP.png", */
         roles: [],
+        companys: [],
         departmentId: "",
-        departmentTitle: "" */
+        departmentTitle: ""
       },
       userRoles: [],
       roleList: [],
+      companyList: [],
       errorPass: "",
       userFormValidate: {
         username: [
@@ -322,7 +331,13 @@ export default {
         },
         {
           title: "所属部门",
-          key: "departmentTitle",
+          key: "departments",
+          render: (h, params) => {
+            let departmentTitle = (params.row.departments && params.row.departments.length > 0) ?
+                    params.row.departments[0].name :
+                      '';
+            return h("div", departmentTitle);
+          },
           width: 120
         },
         {
@@ -359,7 +374,7 @@ export default {
             return h("div", re);
           }
         },
-        {
+        /* {
           title: "用户类型",
           key: "type",
           align: "center",
@@ -427,7 +442,7 @@ export default {
               return row.status === -1;
             }
           }
-        },
+        }, */
         {
           title: "创建时间",
           key: "createTime",
@@ -442,7 +457,7 @@ export default {
           align: "center",
           fixed: "right",
           render: (h, params) => {
-            if (params.row.status === 0) {
+            /* if (params.row.status === 0) {
               return h("div", [
                 h(
                   "Button",
@@ -495,7 +510,7 @@ export default {
                   "删除"
                 )
               ]);
-            } else {
+            } else { */
               return h("div", [
                 h(
                   "Button",
@@ -515,7 +530,7 @@ export default {
                   },
                   "编辑"
                 ),
-                h(
+                /* h(
                   "Button",
                   {
                     props: {
@@ -532,7 +547,7 @@ export default {
                     }
                   },
                   "启用"
-                ),
+                ), */
                 h(
                   "Button",
                   {
@@ -549,7 +564,7 @@ export default {
                   "删除"
                 )
               ]);
-            }
+            // }
           }
         }
       ],
@@ -613,92 +628,95 @@ export default {
       this.accessToken = {
         accessToken: this.getStore("accessToken")
       };
-      // this.initDepartmentData();
+      this.initDepartmentData();
       this.getUserList();
-      // this.initDepartmentTreeData();
+      this.initDepartmentTreeData();
+      this.initCompany();
     },
     initCompany() {
-      
+      getAllCompany().then(res => {
+        this.companyList = res.data;
+      })
     },
     initDepartmentData() {
       initDepartment().then(res => {
-        if (res.success === true) {
-          res.result.forEach(function(e) {
-            if (e.isParent) {
-              e.value = e.id;
-              e.label = e.title;
-              e.loading = false;
-              e.children = [];
-            } else {
-              e.value = e.id;
-              e.label = e.title;
-            }
-            if (e.status === -1) {
-              e.label = "[已禁用] " + e.label;
-              e.disabled = true;
-            }
-          });
-          this.department = res.result;
-        }
+        res.data.forEach(function(e) {
+          e.title = e.name;
+          e.isParent = e.parentId === '0';
+          if (e.isParent) {
+            e.value = e.id;
+            e.label = e.title;
+            e.loading = false;
+            e.children = [];
+          } else {
+            e.value = e.id;
+            e.label = e.title;
+          }
+          if (e.status === -1) {
+            e.label = "[已禁用] " + e.label;
+            e.disabled = true;
+          }
+        });
+        this.department = res.data;
       });
     },
     initDepartmentTreeData() {
       initDepartment().then(res => {
-        if (res.success === true) {
-          res.result.forEach(function(e) {
-            if (e.isParent) {
-              e.loading = false;
-              e.children = [];
-            }
-            if (e.status === -1) {
-              e.title = "[已禁用] " + e.title;
-              e.disabled = true;
-            }
-          });
-          this.dataDep = res.result;
-        }
+        res.data.forEach(function(e) {
+          e.title = e.name;
+          e.isParent = e.parentId === '0';
+          if (e.isParent) {
+            e.loading = false;
+            e.children = [];
+          }
+          if (e.status === -1) {
+            e.title = "[已禁用] " + e.title;
+            e.disabled = true;
+          }
+        });
+        this.dataDep = res.data;
       });
     },
     loadData(item, callback) {
       item.loading = true;
       loadDepartment(item.value).then(res => {
         item.loading = false;
-        if (res.success === true) {
-          res.result.forEach(function(e) {
-            if (e.isParent) {
-              e.value = e.id;
-              e.label = e.title;
-              e.loading = false;
-              e.children = [];
-            } else {
-              e.value = e.id;
-              e.label = e.title;
-            }
-            if (e.status === -1) {
-              e.label = "[已禁用] " + e.label;
-              e.disabled = true;
-            }
-          });
-          item.children = res.result;
-          callback();
-        }
+        res.data.forEach(function(e) {
+          e.title = e.name;
+          e.isParent = e.parentId === '0';
+          if (e.isParent) {
+            e.value = e.id;
+            e.label = e.title;
+            e.loading = false;
+            e.children = [];
+          } else {
+            e.value = e.id;
+            e.label = e.title;
+          }
+          if (e.status === -1) {
+            e.label = "[已禁用] " + e.label;
+            e.disabled = true;
+          }
+        });
+        item.children = res.data;
+        callback();
       });
     },
     loadDataTree(item, callback) {
       loadDepartment(item.id).then(res => {
-        if (res.success === true) {
-          res.result.forEach(function(e) {
-            if (e.isParent) {
-              e.loading = false;
-              e.children = [];
-            }
-            if (e.status === -1) {
-              e.title = "[已禁用] " + e.title;
-              e.disabled = true;
-            }
-          });
-          callback(res.result);
-        }
+        res.data.forEach(function(e) {
+          e.title = e.name;
+          e.isParent = e.parentId === '0';
+          if (e.isParent) {
+            e.loading = false;
+            e.children = [];
+          }
+          if (e.status === -1) {
+            e.title = "[已禁用] " + e.title;
+            e.disabled = true;
+          }
+        });
+        callback(res.data);
       });
     },
     selectTree(v) {
@@ -804,9 +822,7 @@ export default {
     },
     getRoleList() {
       getAllRoleList().then(res => {
-        if (res.success === true) {
-          this.roleList = res.result;
-        }
+        this.roleList = res.data;
       });
     },
     handleDropdown(name) {
@@ -849,6 +865,17 @@ export default {
     submitUser() {
       this.$refs.userForm.validate(valid => {
         if (valid) {
+          let params = {
+            username: this.userForm.username,
+            password: this.userForm.password,
+            workNumber: this.userForm.workNumber,
+            sex: this.userForm.sex,
+            email: this.userForm.email,
+            tel: this.userForm.tel,
+            roleIds: this.userForm.roles.join(','),
+            departmentIds: this.userForm.departmentId,
+            companyIds: this.userForm.companys.join(',')
+          }
           if (this.modalType === 0) {
             // 添加用户 避免编辑后传入id
             delete this.userForm.id;
@@ -865,20 +892,25 @@ export default {
               return;
             }
             this.submitLoading = true;
-            addUser(this.userForm).then(res => {
+            addUser(params).then(res => {
               this.submitLoading = false;
               this.$Message.success("操作成功");
               this.getUserList();
               this.userModalVisible = false;
+            }).catch(() => {
+              this.submitLoading = false;
             });
           } else {
+            params.id = this.userForm.id;
             // 编辑
             this.submitLoading = true;
-            editUser(this.userForm).then(res => {
+            editUser(params).then(res => {
               this.submitLoading = false;
               this.$Message.success("操作成功");
               this.getUserList();
               this.userModalVisible = false;
+            }).catch(() => {
+              this.submitLoading = false;
             });
           }
         }
@@ -933,17 +965,30 @@ export default {
       // 转换null为""
       for (let attr in v) {
         if (v[attr] === null) {
-          v[attr] = "";
+          if (attr === 'roles' || attr === 'departments' || attr === 'companys') {
+            v[attr] = [];
+          } else {
+            v[attr] = "";
+          }
         }
       }
       let str = JSON.stringify(v);
       let userInfo = JSON.parse(str);
       this.userForm = userInfo;
       let selectRolesId = [];
-      /* this.userForm.roles.forEach(function(e) {
+      this.userForm.roles.forEach(function(e) {
         selectRolesId.push(e.id);
       });
-      this.userForm.roles = selectRolesId; */
+      this.userForm.roles = selectRolesId;
+      if (this.userForm.departments.length > 0) {
+        this.userForm.departmentId = this.userForm.departments[0].id;
+        this.userForm.departmentTitle = this.userForm.departments[0].name;
+      }
+      let selectCompanyIds = [];
+      this.userForm.companys.forEach(e => {
+        selectCompanyIds.push(e.id);
+      });
+      this.userForm.companys = selectCompanyIds;
       this.userModalVisible = true;
     },
     enable(v) {
@@ -1039,7 +1084,7 @@ export default {
   },
   mounted() {
     this.init();
-    // this.getRoleList();
+    this.getRoleList();
   }
 };
 </script>
