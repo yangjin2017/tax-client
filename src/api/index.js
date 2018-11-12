@@ -83,6 +83,10 @@ export const getRelatedListData = (params) => {
 export const getAllCompany = params => {
     return getRequest('/company/getAll', params)
 }
+// 获取未被分配的公司列表
+export const getUnAssignCompany = params => {
+    return getRequest('/company/getUnAssign', params)
+}
 // 获取公司列表
 export const getCompanyListData = params => {
     return postRequest('/company/getAllPage', params)

@@ -130,7 +130,7 @@
                   </Upload>
                 </Form-item> -->
                 <FormItem label="所属公司" prop="companys">
-                  <Select v-model="userForm.companys" multiple>
+                  <Select v-model="userForm.companys" multiple filterable>
                       <Option v-for="item in companyList" :value="item.id" :key="item.id" :label="item.name">
                       </Option>
                   </Select>
@@ -191,7 +191,7 @@ import {
   loadDepartment,
   getUserListData,
   getAllRoleList,
-  getAllCompany,
+  getUnAssignCompany,
   addUser,
   editUser,
   enableUser,
@@ -634,7 +634,7 @@ export default {
       this.initCompany();
     },
     initCompany() {
-      getAllCompany().then(res => {
+      getUnAssignCompany().then(res => {
         this.companyList = res.data;
       })
     },

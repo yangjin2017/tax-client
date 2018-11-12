@@ -80,12 +80,12 @@ export default {
         },
         {
           title: "操作名称",
-          key: "name",
+          key: "method",
           width: 110,
           sortable: true,
           fixed: "left"
         },
-        {
+        /* {
           title: "请求类型",
           key: "requestType",
           width: 120,
@@ -126,11 +126,11 @@ export default {
           title: "请求路径",
           width: 150,
           key: "requestUrl"
-        },
+        }, */
         {
           title: "请求参数",
-          width: 200,
-          key: "requestParam",
+          // width: 200,
+          key: "param",
           tooltip: true
         },
         {
@@ -145,7 +145,7 @@ export default {
           width: 120,
           sortable: true
         },
-        {
+        /* {
           title: "IP信息",
           key: "ipInfo",
           width: 100,
@@ -175,7 +175,7 @@ export default {
               return row.costTime > 1000;
             }
           }
-        },
+        }, */
         {
           title: "创建时间",
           key: "createTime",
@@ -243,17 +243,19 @@ export default {
       // 后端可配置使用数据库或Elasticsearch搜索 这里分开了2个请求
       if (this.searchKey === "" && this.startDate === "") {
         params = {
-          pageNumber: this.pageNumber,
-          pageSize: this.pageSize,
-          sort: this.sortColumn,
-          order: this.sortType
+          pageVo: {
+            pageNumber: this.pageNumber,
+            pageSize: this.pageSize
+          }
+          // sort: this.sortColumn,
+          // order: this.sortType
         };
         getLogListData(params).then(res => {
           this.loading = false;
-          if (res.success === true) {
-            this.data = res.result.content;
-            this.total = res.result.totalElements;
-          }
+          this.data = res.data.list;
+          this.total = res.data.total;
+        }).catch(err => {
+          this.loading = false;
         });
       } else {
         params = {
