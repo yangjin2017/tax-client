@@ -212,6 +212,7 @@ export default {
       if (e.target.value === '') this.insideTableData = this.value
     },
     handleSearch () {
+      if (!this.searchKey) return
       this.insideTableData = this.value.filter(item => item[this.searchKey].indexOf(this.searchValue) > -1)
     },
     handleTableData () {

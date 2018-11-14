@@ -10,6 +10,7 @@ let base = '/api';
 // axios.defaults.timeout = 15000;
 
 axios.interceptors.request.use(config => {
+    console.log(config);
     return config;
 }, err => {
     Message.error('请求超时');
@@ -101,7 +102,10 @@ export const postRequest = (url, params) => {
     return axios({
         method: 'post',
         url: `${base}${url}`,
-        data: params
+        data: params,
+        headers: {
+            'accessToken': accessToken
+        }
     });
 };
 

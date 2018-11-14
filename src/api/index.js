@@ -91,6 +91,10 @@ export const getUnAssignCompany = params => {
 export const getCompanyListData = params => {
     return postRequest('/company/getAllPage', params)
 }
+// 获取公司列表
+export const getCompanyByName = params => {
+    return postRequest('/company/getByName', params)
+}
 // 添加公司
 export const addCompany = params => {
     return postRequest('/company/add', params)
@@ -306,4 +310,9 @@ export const editMessageSend = (params) => {
 // 删除发送消息
 export const deleteMessageSend = (ids, params) => {
     return deleteRequest(`/messageSend/delByIds/${ids}`, params)
+}
+
+// 税金申请
+export const taxAdd = (params) => {
+    return postRequest('/tax/add', params)
 }
