@@ -316,3 +316,48 @@ export const deleteMessageSend = (ids, params) => {
 export const taxAdd = (params) => {
     return postRequest('/tax/add', params)
 }
+// 待提任务
+export const taxReadyCommit = params => {
+    return postRequest('/tax/readyCommit', params)
+}
+// 待办任务
+export const taxReadyHandle = params => {
+    return postRequest('/tax/readyHandle', params)
+}
+// 已办任务
+export const taxAlreadyHandle = params => {
+    return postRequest('/tax/alreadyHandle', params)
+}
+
+// 上传文件
+export const uploadFile = params => {
+    return uploadFileRequest('/file/upload', params);
+}
+export const downloadFile = (fileName, params) => {
+    return postRequest(`/file/download/${fileName}`, params);
+}
+// 预览文件
+export const previewFile = (name, params) => {
+    return getRequest(`/file/${name}`, params);
+}
+// 查询资料
+export const getFilesList = params => {
+    return postRequest('/material/getAllPage', params);
+}
+
+// 查询调度
+export const getSchedualList = params => {
+    return postRequest('/schedual/getAllByPage', params)
+}
+// 暂停调度
+export const schedualPause = params => {
+    return postRequest('/schedual/pause', params)
+}
+// 恢复调度
+export const schedualResume = params => {
+    return postRequest('/schedual/resume', params)
+}
+// 删除调度
+export const schedualDel = (ids, params) => {
+    return deleteRequest(`/schedual/delByIds/${ids}`, params);
+}

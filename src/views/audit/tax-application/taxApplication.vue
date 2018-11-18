@@ -36,7 +36,7 @@
           </Form-item>
           <br/>
           <Form-item label="财务报表" prop="financialReport">
-            <Upload action="//jsonplaceholder.typicode.com/posts/">
+            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'FINANCE_REPORT'}" :show-upload-list="false" :on-success="financeUploadSuc">
               <Button icon="ios-cloud-upload-outline">上传文件</Button>
             </Upload>
           </Form-item>
@@ -46,6 +46,7 @@
       <Row class="operation">
         <!-- <Button @click="delAll" icon="md-trash">批量删除</Button> -->
         <Button @click="addColumn" icon="md-add">增加一栏</Button>
+        <Button @click="submit('save')" >保存</Button>
         <Button @click="submit" >提交</Button>
         <circleLoading v-if="operationLoading"/>
       </Row>
@@ -60,6 +61,32 @@
       </Row>
     </Card>
     </Col>
+    <Modal
+        v-model="showUploadModal"
+        title="Common Modal dialog box title"
+        @on-ok="uploadModalOk"
+        @on-cancel="uploadModalCancel">
+        <Form label-position="left" :label-width="100">
+          <FormItem label="申报表">
+            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'TAX_REPORT'}" :show-upload-list="false" :on-success="uploadSuc">
+              <Button icon="ios-cloud-upload-outline">上传文件</Button>
+              <div v-if="fileUploadForm.taxReturns">{{ fileUploadForm.taxReturns_name }}<Button @click.stop="filePriview(fileUploadForm.taxReturns)">预览</Button></div>
+            </Upload>
+          </FormItem>
+          <FormItem label="完税申报表">
+            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'DONE_TAX_REPORT'}" :show-upload-list="false" :on-success="uploadSuc">
+              <Button icon="ios-cloud-upload-outline">上传文件</Button>
+              <div v-if="fileUploadForm.paymentCertificate">{{ fileUploadForm.paymentCertificate_name }}</div>
+            </Upload>
+          </FormItem>
+          <FormItem label="其它">
+            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'OTHER'}" :show-upload-list="false" :on-success="uploadSuc">
+              <Button icon="ios-cloud-upload-outline">上传文件</Button>
+              <div v-if="fileUploadForm.otherUploadId">{{ fileUploadForm.otherUploadId_name }}</div>
+            </Upload>
+          </FormItem>
+      </Form>
+    </Modal>
   </Row>
 </template>
 
@@ -68,9 +95,11 @@ import {
   getAllCompany,
   getDictListDataByType,
   getCompanyByName,
-  taxAdd
+  taxAdd,
+  previewFile
 } from '@/api/index'
 import { dictType } from '@/libs/constance.js'
+import { getStore } from '@/libs/storage';
 import circleLoading from "../../my-components/circle-loading.vue"
 export default {
   name: 'taxApplication',
@@ -78,6 +107,8 @@ export default {
     return {
       loading: false,
       operationLoading: false,
+      accessToken: getStore('accessToken'),
+      showUploadModal: false,
       form: {
         company: '',
         tin: '',
@@ -143,11 +174,12 @@ export default {
           key: "applTaxPayment",
           align: 'center',
           width: 120,
-          render: (h, params) => {
+          render: this.renderInput
+          /* render: (h, params) => {
             let item = this.data[params.index];
             item[params.column.key] = parseFloat(item.payableTax) + parseFloat(item.lateFeePayable);
             return h('div', item[params.column.key])
-          }
+          } */
         },
         {
           title: '缴款截止日期',
@@ -206,7 +238,15 @@ export default {
                     },
                     on: {
                       click: () => {
-                        // this.edit(params.row);
+                        let item = this.data[params.index];
+                        let {taxReturns, paymentCertificate, otherUploadId} = item;
+                        this.fileUploadForm = {
+                          uploadColomunIndex: params.index,
+                          taxReturns,
+                          paymentCertificate,
+                          otherUploadId
+                        }
+                        this.showUploadModal = true;
                       }
                     }
                   },
@@ -223,7 +263,15 @@ export default {
                     },
                     on: {
                       click: () => {
-                        // this.disable(params.row);
+                        let item = this.data[params.index];
+                        let {taxReturns, paymentCertificate, otherUploadId} = item;
+                        this.fileUploadForm = {
+                          uploadColomunIndex: params.index,
+                          taxReturns,
+                          paymentCertificate,
+                          otherUploadId
+                        }
+                        this.showUploadModal = true;
                       }
                     }
                   },
@@ -262,7 +310,13 @@ export default {
       dictTaxCategorys: [],
       dictTaxPayments: [],
       selectList: [],
-      selectCount: 0
+      selectCount: 0,
+      fileUploadForm: {
+        uploadColomunIndex: null,
+        taxReturns: '',
+        paymentCertificate: '',
+        otherUploadId: ''
+      }
     }
   },
   methods: {
@@ -415,11 +469,50 @@ export default {
           this.loading = false;
         })
     },
-    submit() {
+    /* 财务报表上传成功 */
+    financeUploadSuc(res) {
+      this.form.financialReport = res.data.id;
+    },
+    /* 税金申请 - 文件上传 */
+    uploadSuc(res) {
+      let key = {
+        'TAX_REPORT': 'taxReturns',
+        'DONE_TAX_REPORT': 'paymentCertificate',
+        'OTHER': 'otherUploadId'
+      }[res.data.materialTypeDict];
+      this.fileUploadForm[key] = res.data.id;
+      this.fileUploadForm[key + '_name'] = res.data.oriName;
+    },
+    uploadModalOk() {
+      let {uploadColomunIndex, taxReturns, paymentCertificate, otherUploadId} = this.fileUploadForm;
+      this.data[uploadColomunIndex].taxReturns = taxReturns;
+      this.data[uploadColomunIndex].paymentCertificate = paymentCertificate;
+      this.data[uploadColomunIndex].otherUploadId = otherUploadId;
+      this.showUploadModal = false;
+    },
+    uploadModalCancel() {
+      this.fileUploadForm = {
+        uploadColomunIndex: null,
+        taxReturns: '',
+        paymentCertificate: '',
+        otherUploadId: ''
+      }
+      this.showUploadModal = false;
+    },
+    filePriview(name) {
+      previewFile(name).then(res => {
+        console.log(res);
+      });
+      return false;
+    },
+    /* 提交 */
+    submit(save) {
       let params = {...this.form, details: this.data};
+      // 所属期间字段显示月份，但提交后台需要精确值日
       params.details.map(item => {
         item.taxPeriod = item.taxPeriod + '-01';
-      })
+      });
+      params.executeType = save === 'save' ? 0 : 1;
       this.loading = true;
       taxAdd(params).then(res => {
         
