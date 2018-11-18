@@ -71,7 +71,7 @@ export default {
                     },
                     on: {
                       click: () => {
-                        
+                        this.edit(params.row);
                       }
                     }
                   },
@@ -143,6 +143,9 @@ export default {
         this.endDate = v[1];
       }
     },
+    edit(v) {
+      this.$router.push({name: 'taxApplication', params: {type: 'readyCommit', params: v}});
+    }
   },
   mounted() {
     this.init();

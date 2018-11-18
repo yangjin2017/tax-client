@@ -47,23 +47,27 @@ export default {
           type: "index",
           width: 80,
           title: '序号',
-          align: "center"
+          align: "center",
+          fixed: "left"
         },
         {
           title: "任务类名",
           key: "jobClassName",
           sortable: true,
-          width: 200
+          width: 200,
+          fixed: "left"
         },
         {
           title: "cron表达式",
           key: "cronExpression",
-          sortable: true
+          sortable: true,
+          width: 200
         },
         {
           title: "参数",
           key: "parameter",
-          sortable: true
+          sortable: true,
+          width: 200
         },
         {
           title: "备注",
@@ -79,7 +83,7 @@ export default {
         {
           title: '创建时间',
           key: "createTime",
-          // width: 110
+          width: 110
         },
         {
           title: '修改人',
@@ -89,13 +93,14 @@ export default {
         {
           title: '修改时间',
           key: "updateTime",
-          // width: 110
+          width: 110
         },
         {
           title: "状态",
           key: "status",
           align: "center",
-          width: 140,
+          width: 120,
+          fixed: "right",
           render: (h, params) => {
             let re = "";
             if (params.row.status === 0) {
@@ -149,7 +154,8 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
-          width: 280,
+          width: 180,
+          fixed: "right",
           render: (h, params) => {
             if (params.row.status === 0) {
               return h("div", [

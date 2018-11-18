@@ -9,8 +9,8 @@
     <Card>
       <Row>
         <Form ref="form" :model="form" inline :label-width="90" class="search-form">
-          <Form-item label="公司名称" prop="company">
-            <Select v-model="form.company" filterable style="width: 200px" @on-change="changeCompany" label-in-value>
+          <Form-item label="公司名称" prop="companyId">
+            <Select v-model="form.companyId" filterable style="width: 200px" @on-change="changeCompany" label-in-value>
               <Option v-for="item in companyList" :value="item.id" :key="item.id" :label="item.name">
               </Option>
             </Select>
@@ -28,9 +28,9 @@
               <Option v-for="item in dictCurrencys" :value="item.code" :key="item.id">{{ item.name }}</Option>
             </Select>
           </Form-item>
-          <Form-item label="申请人" prop="applicantName">
+          <!-- <Form-item label="申请人" prop="applicantName">
             <Input type="text" v-model="form.applicantName" clearable placeholder="请输入申请人姓名" style="width: 200px" />
-          </Form-item>
+          </Form-item> -->
           <Form-item label="备注" prop="remarks">
             <Input type="text" v-model="form.remarks" clearable placeholder="请输入备注" style="width: 200px" />
           </Form-item>
@@ -110,7 +110,7 @@ export default {
       accessToken: getStore('accessToken'),
       showUploadModal: false,
       form: {
-        company: '',
+        companyId: '',
         tin: '',
         countryCode: '',
         currency: '',
@@ -321,9 +321,28 @@ export default {
   },
   methods: {
     init() {
+      this.initPageData()
       this.initCompanyList()
       this.getDictData()
       this.addColumn()
+    },
+    initPageData() {
+      let type = this.$route.params.type;
+      if (!type) return;
+      if (type === 'readyCommit') {
+        let data = this.$route.params.params.details;
+        data && data.map(item => {
+          item.taxPeriod.replace(/-01$/, '');
+        });
+        this.data = data || [];
+        let params = this.$route.params.params;
+        this.form.companyId = params.companyId;
+        this.form.tin = params.tin;
+        this.form.countryCode = params.countryCode;
+        this.form.currency = params.currency;
+        this.form.remarks = params.remarks;
+        this.form.financialReport = params.financialReport;
+      }
     },
     /* 获取公司列表 */
     initCompanyList() {
@@ -389,7 +408,7 @@ export default {
       this.selectCount = e.length;
     },
     addColumn() {
-      this.data.push({
+      this.data.length > 0 || this.data.push({
         taxPeriod: '',
         taxDict: '',
         payableTax: 0,
@@ -411,7 +430,7 @@ export default {
           value: params.row[params.column.key]
         },
         on: {
-          'on-blur': e => {
+          'on-change': e => {
             this.data[params.index][params.column.key] = e.target.value;
           }
         }
@@ -515,7 +534,7 @@ export default {
       params.executeType = save === 'save' ? 0 : 1;
       this.loading = true;
       taxAdd(params).then(res => {
-        
+        this.$Message.success('操作成功')
       }).finally(() => {
         this.loading = false;
       })
