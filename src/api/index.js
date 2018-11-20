@@ -316,15 +316,27 @@ export const deleteMessageSend = (ids, params) => {
 export const taxAdd = (params) => {
     return postRequest('/tax/add', params)
 }
-// 待提任务
+// 待提申请
 export const taxReadyCommit = params => {
     return postRequest('/tax/readyCommit', params)
 }
-// 待办任务
+// 获取申请详情
+export const taxDetail = (id, params) => {
+    return getRequest(`/tax/get/${id}`, params)
+}
+// 税金申请编辑
+export const taxEdit = params => {
+    return postRequest('/tax/edit', params)
+}
+// 删除税金申请
+export const taxDel = id => {
+    return deleteRequest(`/tax/delById/${id}`)
+}
+// 待办申请
 export const taxReadyHandle = params => {
     return postRequest('/tax/readyHandle', params)
 }
-// 已办任务
+// 已办申请
 export const taxAlreadyHandle = params => {
     return postRequest('/tax/alreadyHandle', params)
 }

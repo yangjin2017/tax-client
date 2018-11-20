@@ -51,9 +51,12 @@ export default {
         {
           title: '保存时间',
           key: "saveTime",
+          render: (h, params) => {
+            return h('div', params.row.saveTime && new Date(params.row.saveTime).format())
+          }
           // width: 110
         },
-        {
+        /* {
           title: '操作',
           width: 130,
           align: "center",
@@ -94,7 +97,7 @@ export default {
                 )
               ]);
           }
-        }
+        } */
       ],
       data: [],
       pageNumber: 1,

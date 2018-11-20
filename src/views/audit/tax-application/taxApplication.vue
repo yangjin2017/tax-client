@@ -32,7 +32,7 @@
             <Input type="text" v-model="form.applicantName" clearable placeholder="请输入申请人姓名" style="width: 200px" />
           </Form-item> -->
           <Form-item label="备注" prop="remarks">
-            <Input type="text" v-model="form.remarks" clearable placeholder="请输入备注" style="width: 200px" />
+            <Input type="text" v-model="form.remarks" :maxlength="200" clearable placeholder="请输入备注" style="width: 200px" />
           </Form-item>
           <br/>
           <Form-item label="财务报表" prop="financialReport">
@@ -92,11 +92,13 @@
 
 <script>
 import {
-  getAllCompany,
-  getDictListDataByType,
-  getCompanyByName,
-  taxAdd,
-  previewFile
+  getAllCompany,  // 获取所有公司
+  getDictListDataByType,  // 根据类型获取字典信息
+  getCompanyByName,   // 根据公司名称获取公司详情
+  taxAdd,   // 税金申请新增
+  taxDetail,    // 获取税金申请详情（待提申请）
+  taxEdit,    // 税金申请编辑
+  previewFile   // 文件预览
 } from '@/api/index'
 import { dictType } from '@/libs/constance.js'
 import { getStore } from '@/libs/storage';
@@ -207,9 +209,12 @@ export default {
           align: 'center',
           width: 120,
           render: (h, params) => {
-            let item = this.data[params.index];
-            let num = parseFloat(item.taxPaid) + parseFloat(item.overduePayment);
-            return h('div', num)
+            return h('div', {
+              domProps: {
+                innerText: parseFloat(params.row.taxPaid) + parseFloat(params.row.overduePayment)
+              }
+            })
+            return h('div', parseFloat(this.data[params.index].taxPaid) + parseFloat(this.data[params.index].overduePayment))
           }
         },
         {
@@ -329,19 +334,27 @@ export default {
     initPageData() {
       let type = this.$route.params.type;
       if (!type) return;
+      // 待提任务回显
       if (type === 'readyCommit') {
-        let data = this.$route.params.params.details;
-        data && data.map(item => {
-          item.taxPeriod.replace(/-01$/, '');
-        });
-        this.data = data || [];
-        let params = this.$route.params.params;
-        this.form.companyId = params.companyId;
-        this.form.tin = params.tin;
-        this.form.countryCode = params.countryCode;
-        this.form.currency = params.currency;
-        this.form.remarks = params.remarks;
-        this.form.financialReport = params.financialReport;
+        this.loading = true;
+        taxDetail(this.$route.params.params.id).then(res => {
+          let data = res.data.details;
+          data && data.map(item => {
+            item.taxPeriod.replace(/-01$/, '');
+            item.paymentTime = new Date(item.paymentTime).format('yyyy-MM-dd');
+            item.deadline = new Date(item.deadline).format('yyyy-MM-dd');
+          });
+          this.data = data || [];
+          let params = res.data;
+          this.form.companyId = params.companyId;
+          this.form.tin = params.tin;
+          this.form.countryCode = params.countryCode;
+          this.form.currency = params.currency;
+          this.form.remarks = params.remarks;
+          this.form.financialReport = params.financialReport;
+        }).finally(() => {
+          this.loading = false;
+        })
       }
     },
     /* 获取公司列表 */
@@ -408,7 +421,7 @@ export default {
       this.selectCount = e.length;
     },
     addColumn() {
-      this.data.length > 0 || this.data.push({
+      this.data.push({
         taxPeriod: '',
         taxDict: '',
         payableTax: 0,
@@ -424,14 +437,44 @@ export default {
     },
     /* 表格栏输入框渲染函数 */
     renderInput(h, params) {
+      let temp = null;
+      if (params.column.key === 'applTaxPayment') {
+        temp = parseFloat(params.row.payableTax) + parseFloat(params.row.lateFeePayable);
+      }
+      /* if (params.column.key === 'remarks') {
+        return h('Input', {
+          props: {
+            type: 'text',
+            maxlength: 100,
+            value: params.row[params.column.key]
+          },
+          on: {
+            input: e => {
+              params.row[params.column.key] = e;
+              this.data[params.index] = params.row;
+            }
+          }
+        })
+      } else {
+        return h('Tooltip', [
+          h()
+        ])
+      } */
       return h('Input', {
         props: {
           type: 'text',
-          value: params.row[params.column.key]
+          maxlength: params.column.key === 'remarks' ? 100 : 10,
+          value: temp || params.row[params.column.key],
+          number: params.column.key != 'remarks'
         },
         on: {
-          'on-change': e => {
-            this.data[params.index][params.column.key] = e.target.value;
+          input: e => {
+            if (params.column.key === 'remarks') {
+              params.row[params.column.key] = e;
+            } else {
+              params.row[params.column.key] = isNaN(e) ? 0 : e;
+            }
+            this.data[params.index] = params.row;
           }
         }
       })
@@ -527,13 +570,27 @@ export default {
     /* 提交 */
     submit(save) {
       let params = {...this.form, details: this.data};
+      params.executeType = save === 'save' ? 0 : 1;
+      if (save != 'save') {
+        if (!params.companyId) {
+          this.$Message.error('请选择公司');
+          return;
+        }
+        let flag = params.details.some((item) => {
+          return item.applTaxPayment <= 0
+        });
+        if (flag) {
+          this.$Message.error('申请缴纳税款不能为空');
+          return;
+        }
+      }
       // 所属期间字段显示月份，但提交后台需要精确值日
       params.details.map(item => {
-        item.taxPeriod = item.taxPeriod + '-01';
+        item.taxPeriod = item.taxPeriod && item.taxPeriod + '-01';
       });
-      params.executeType = save === 'save' ? 0 : 1;
       this.loading = true;
-      taxAdd(params).then(res => {
+      let fn = this.$route.params.type === 'readyCommit' ? taxEdit : taxAdd;
+      fn(params).then(res => {
         this.$Message.success('操作成功')
       }).finally(() => {
         this.loading = false;

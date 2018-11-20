@@ -51,6 +51,9 @@ export default {
         {
           title: '保存时间',
           key: "saveTime",
+          render: (h, params) => {
+            return h('div', params.row.saveTime && new Date(params.row.saveTime).format())
+          }
           // width: 110
         },
         {
@@ -71,26 +74,11 @@ export default {
                     },
                     on: {
                       click: () => {
-                        
+                        this.handle(params.row);
                       }
                     }
                   },
-                  "编辑"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "error",
-                      size: "small"
-                    },
-                    on: {
-                      click: () => {
-                        // this.remove(params.row);
-                      }
-                    }
-                  },
-                  "删除"
+                  "处理"
                 )
               ]);
           }
@@ -143,6 +131,10 @@ export default {
         this.endDate = v[1];
       }
     },
+    /* 处理申请 */
+    handle(v) {
+      
+    }
   },
   mounted() {
     this.init();

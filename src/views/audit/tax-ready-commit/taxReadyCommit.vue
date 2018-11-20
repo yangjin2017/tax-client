@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { taxReadyCommit } from '@/api/index.js'
+import { taxReadyCommit, taxDel } from '@/api/index.js'
 export default {
   name: 'taxReadyCommit',
   data() {
@@ -51,6 +51,9 @@ export default {
         {
           title: '保存时间',
           key: "saveTime",
+          render: (h, params) => {
+            return h('div', params.row.saveTime && new Date(params.row.saveTime).format())
+          }
           // width: 110
         },
         {
@@ -86,7 +89,7 @@ export default {
                     },
                     on: {
                       click: () => {
-                        // this.remove(params.row);
+                        this.remove(params.row);
                       }
                     }
                   },
@@ -145,6 +148,15 @@ export default {
     },
     edit(v) {
       this.$router.push({name: 'taxApplication', params: {type: 'readyCommit', params: v}});
+    },
+    remove(v) {
+      this.loading = true;
+      taxDel(v.id).then(res => {
+        this.initPageData()
+        this.$Message.success('操作成功')
+      }).finally(() => {
+        this.loading = false;
+      })
     }
   },
   mounted() {

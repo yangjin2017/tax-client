@@ -37,6 +37,7 @@ Vue.prototype.uploadFileRequest = uploadFileRequest;
 Vue.prototype.setStore = setStore;
 Vue.prototype.getStore = getStore;
 Vue.prototype.removeStore = removeStore;
+util.timeFormat();
 
 /* eslint-disable no-new */
 new Vue({
