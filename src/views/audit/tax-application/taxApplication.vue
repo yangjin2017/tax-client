@@ -441,7 +441,7 @@ export default {
       if (params.column.key === 'applTaxPayment') {
         temp = parseFloat(params.row.payableTax) + parseFloat(params.row.lateFeePayable);
       }
-      /* if (params.column.key === 'remarks') {
+      if (params.column.key === 'remarks') {
         return h('Input', {
           props: {
             type: 'text',
@@ -456,11 +456,20 @@ export default {
           }
         })
       } else {
-        return h('Tooltip', [
-          h()
-        ])
-      } */
-      return h('Input', {
+        return h('InputNumber', {
+          props: {
+            maxlength: 10,
+            value: params.row[params.column.key]
+          },
+          on: {
+            input: e => {
+              params.row[params.column.key] = e;
+              this.data[params.index] = params.row;
+            }
+          }
+        })
+      }
+      /* return h('Input', {
         props: {
           type: 'text',
           maxlength: params.column.key === 'remarks' ? 100 : 10,
@@ -477,7 +486,7 @@ export default {
             this.data[params.index] = params.row;
           }
         }
-      })
+      }) */
     },
     /* 表格框下拉选择框渲染函数 */
     renderSelect(h, params) {
@@ -571,6 +580,14 @@ export default {
     submit(save) {
       let params = {...this.form, details: this.data};
       params.executeType = save === 'save' ? 0 : 1;
+      /*
+        TODO：
+       姚龙:
+        还有税金申请那块，我改了一点代码，就是财务申报资料   完税申报    扣款凭证这3个文件你不上传，你是提交不了税金的
+
+        姚龙:
+        只能保存
+      */
       if (save != 'save') {
         if (!params.companyId) {
           this.$Message.error('请选择公司');

@@ -29,6 +29,14 @@
     <Row type="flex" justify="end" class="page">
       <Page :current="pageNumber" :total="total" :page-size="pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>
     </Row>
+    <Modal
+        v-model="priviewModal"
+        :title="fileName"
+        width="700"
+        footer-hide>
+        <iframe style="width: 100%; height: 600px;" :src="filePath" frameborder="0"></iframe>
+    </Modal>
+    <a :href="downloadPath" :download="fileName" id="download"></a>
     </Card>
     </Col>
     </Row>
@@ -42,6 +50,8 @@ export default {
   data() {
     return {
       loading: false,
+      priviewModal: false,
+      fileName: '',
       materialTypeDicts: {
         'FINANCE_REPORT': '财务报表',
         'TAX_REPORT': '税务申报表',
@@ -94,7 +104,7 @@ export default {
                     },
                     on: {
                       click: () => {
-                        
+                        this.priviewFile(params.row)
                       }
                     }
                   },
@@ -109,7 +119,7 @@ export default {
                     },
                     on: {
                       click: () => {
-                        // this.remove(params.row);
+                        this.downloadFile(params.row);
                       }
                     }
                   },
@@ -129,6 +139,14 @@ export default {
       company: '',
       materialTypeDict: '',
       companyList: []
+    }
+  },
+  computed: {
+    filePath() {
+      return this.fileName ? `/api/file/${this.fileName}` : '';
+    },
+    downloadPath() {
+      return this.fileName ? `/api/file/download/${this.fileName}` : '';
     }
   },
   methods: {
@@ -164,6 +182,9 @@ export default {
           this.companyList = res.data;
         })
     },
+    clearSelectAll() {
+      this.$refs.table.selectAll(false)
+    },
     changePage(v) {
       this.pageNumber = v;
       this.initPageData();
@@ -189,6 +210,16 @@ export default {
       this.materialTypeDict = '';
       // 重新加载数据
       this.initPageData();
+    },
+    priviewFile(v) {
+      this.fileName = v.fileName;
+      this.priviewModal = true;
+    },
+    downloadFile(v) {
+      this.fileName = v.fileName;
+      this.$nextTick(() => {
+        document.getElementById('download').click();
+      })
     }
   },
   mounted() {
@@ -196,3 +227,9 @@ export default {
   }
 }
 </script>
+
+<style>
+.ivu-modal-body {
+  padding: 0;
+}
+</style>

@@ -373,3 +373,8 @@ export const schedualResume = params => {
 export const schedualDel = (ids, params) => {
     return deleteRequest(`/schedual/delByIds/${ids}`, params);
 }
+
+// 统计分析
+export const getStatistics = params => {
+    return postRequest('/statistics/findAll', params)
+}
