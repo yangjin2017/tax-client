@@ -2,6 +2,9 @@
   .operation {
     margin-bottom: 2vh;
   }
+  .preview-modal .ivu-modal-body {
+    padding: 0;
+  }
 </style>
 <template>
   <Row>
@@ -38,6 +41,7 @@
           <Form-item label="财务报表" prop="financialReport">
             <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'FINANCE_REPORT'}" :show-upload-list="false" :on-success="financeUploadSuc">
               <Button icon="ios-cloud-upload-outline">上传文件</Button>
+              <span style="padding-left: 10px;" v-if="form.financialReport">已上传</span>
             </Upload>
           </Form-item>
         </Form>
@@ -63,29 +67,42 @@
     </Col>
     <Modal
         v-model="showUploadModal"
-        title="Common Modal dialog box title"
         @on-ok="uploadModalOk"
         @on-cancel="uploadModalCancel">
         <Form label-position="left" :label-width="100">
+          <FormItem label="预申报表">
+            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'PRE_TAX_REPORT'}" :show-upload-list="false" :on-success="uploadSuc">
+              <Button icon="ios-cloud-upload-outline">上传文件</Button>
+              <div v-if="fileUploadForm.preTaxReturns">{{ fileUploadForm.preTaxReturnsPath }}&nbsp;&nbsp;<Button @click.stop="filePriview(fileUploadForm.preTaxReturnsPath)">预览</Button></div>
+            </Upload>
+          </FormItem>
           <FormItem label="申报表">
             <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'TAX_REPORT'}" :show-upload-list="false" :on-success="uploadSuc">
               <Button icon="ios-cloud-upload-outline">上传文件</Button>
-              <div v-if="fileUploadForm.taxReturns">{{ fileUploadForm.taxReturns_name }}<Button @click.stop="filePriview(fileUploadForm.taxReturns)">预览</Button></div>
+              <div v-if="fileUploadForm.taxReturns">{{ fileUploadForm.taxReturnsPath }}&nbsp;&nbsp;<Button @click.stop="filePriview(fileUploadForm.taxReturnsPath)">预览</Button></div>
             </Upload>
           </FormItem>
           <FormItem label="完税申报表">
             <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'DONE_TAX_REPORT'}" :show-upload-list="false" :on-success="uploadSuc">
               <Button icon="ios-cloud-upload-outline">上传文件</Button>
-              <div v-if="fileUploadForm.paymentCertificate">{{ fileUploadForm.paymentCertificate_name }}</div>
+              <div v-if="fileUploadForm.paymentCertificate">{{ fileUploadForm.paymentCertificatePath }}&nbsp;&nbsp;<Button @click.stop="filePriview(fileUploadForm.paymentCertificatePath)">预览</Button></div>
             </Upload>
           </FormItem>
           <FormItem label="其它">
             <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'OTHER'}" :show-upload-list="false" :on-success="uploadSuc">
               <Button icon="ios-cloud-upload-outline">上传文件</Button>
-              <div v-if="fileUploadForm.otherUploadId">{{ fileUploadForm.otherUploadId_name }}</div>
+              <div v-if="fileUploadForm.otherUploadId">{{ fileUploadForm.otherUploadIdPath }}&nbsp;&nbsp;<Button @click.stop="filePriview(fileUploadForm.otherUploadIdPath)">预览</Button></div>
             </Upload>
           </FormItem>
       </Form>
+    </Modal>
+    <Modal
+        v-model="priviewModal"
+        :title="fileName"
+        width="700"
+        class-name="preview-modal"
+        footer-hide>
+        <iframe style="width: 100%; height: 600px;" :src="filePath" frameborder="0"></iframe>
     </Modal>
   </Row>
 </template>
@@ -108,6 +125,9 @@ export default {
   data() {
     return {
       loading: false,
+      priviewModal: false,
+      fileName: '',
+      filePath: '',
       operationLoading: false,
       accessToken: getStore('accessToken'),
       showUploadModal: false,
@@ -244,12 +264,17 @@ export default {
                     on: {
                       click: () => {
                         let item = this.data[params.index];
-                        let {taxReturns, paymentCertificate, otherUploadId} = item;
+                        let {preTaxReturns, preTaxReturnsPath, taxReturns, taxReturnsPath, paymentCertificate, paymentCertificatePath, otherUploadId, otherUpload} = item;
                         this.fileUploadForm = {
                           uploadColomunIndex: params.index,
+                          preTaxReturns,
+                          preTaxReturnsPath,
                           taxReturns,
+                          taxReturnsPath,
                           paymentCertificate,
-                          otherUploadId
+                          paymentCertificatePath,
+                          otherUploadId,
+                          otherUploadPath: otherUpload
                         }
                         this.showUploadModal = true;
                       }
@@ -269,12 +294,17 @@ export default {
                     on: {
                       click: () => {
                         let item = this.data[params.index];
-                        let {taxReturns, paymentCertificate, otherUploadId} = item;
+                        let {preTaxReturns, preTaxReturnsPath, taxReturns, taxReturnsPath, paymentCertificate, paymentCertificatePath, otherUploadId, otherUpload} = item;
                         this.fileUploadForm = {
                           uploadColomunIndex: params.index,
+                          preTaxReturns,
+                          preTaxReturnsPath,
                           taxReturns,
+                          taxReturnsPath,
                           paymentCertificate,
-                          otherUploadId
+                          paymentCertificatePath,
+                          otherUploadId,
+                          otherUploadPath: otherUpload
                         }
                         this.showUploadModal = true;
                       }
@@ -331,6 +361,7 @@ export default {
       this.getDictData()
       this.addColumn()
     },
+    // 获取页面数据
     initPageData() {
       let type = this.$route.params.type;
       if (!type) return;
@@ -459,7 +490,7 @@ export default {
         return h('InputNumber', {
           props: {
             maxlength: 10,
-            value: params.row[params.column.key]
+            value: Number(params.row[params.column.key])
           },
           on: {
             input: e => {
@@ -543,37 +574,48 @@ export default {
     /* 财务报表上传成功 */
     financeUploadSuc(res) {
       this.form.financialReport = res.data.id;
+      this.form.financialReportPath = res.data.fileName;
     },
     /* 税金申请 - 文件上传 */
     uploadSuc(res) {
       let key = {
+        'PRE_TAX_REPORT': 'preTaxReturns',
         'TAX_REPORT': 'taxReturns',
         'DONE_TAX_REPORT': 'paymentCertificate',
         'OTHER': 'otherUploadId'
       }[res.data.materialTypeDict];
       this.fileUploadForm[key] = res.data.id;
-      this.fileUploadForm[key + '_name'] = res.data.oriName;
+      this.fileUploadForm[key + 'Path'] = res.data.fileName;
     },
     uploadModalOk() {
-      let {uploadColomunIndex, taxReturns, paymentCertificate, otherUploadId} = this.fileUploadForm;
-      this.data[uploadColomunIndex].taxReturns = taxReturns;
-      this.data[uploadColomunIndex].paymentCertificate = paymentCertificate;
-      this.data[uploadColomunIndex].otherUploadId = otherUploadId;
+      let uploadColomunIndex = this.fileUploadForm.uploadColomunIndex;
+      this.data[uploadColomunIndex].preTaxReturns = this.fileUploadForm.preTaxReturns;
+      this.data[uploadColomunIndex].preTaxReturnsPath = this.fileUploadForm.preTaxReturnsPath;
+      this.data[uploadColomunIndex].taxReturns = this.fileUploadForm.taxReturns;
+      this.data[uploadColomunIndex].taxReturnsPath = this.fileUploadForm.taxReturnsPath;
+      this.data[uploadColomunIndex].paymentCertificate = this.fileUploadForm.paymentCertificate;
+      this.data[uploadColomunIndex].paymentCertificatePath = this.fileUploadForm.paymentCertificatePath;
+      this.data[uploadColomunIndex].otherUploadId = this.fileUploadForm.otherUploadId;
+      this.data[uploadColomunIndex].otherUpload = this.fileUploadForm.otherUploadIdPath;
       this.showUploadModal = false;
     },
     uploadModalCancel() {
       this.fileUploadForm = {
         uploadColomunIndex: null,
         taxReturns: '',
+        taxReturnsPath: '',
         paymentCertificate: '',
-        otherUploadId: ''
+        paymentCertificatePath: '',
+        otherUploadId: '',
+        otherUploadIdPath: ''
       }
       this.showUploadModal = false;
     },
+    // 文件预览
     filePriview(name) {
-      previewFile(name).then(res => {
-        console.log(res);
-      });
+      this.filePath = previewFile(name);
+      this.fileName = name;
+      this.priviewModal = true;
       return false;
     },
     /* 提交 */
@@ -600,6 +642,13 @@ export default {
           this.$Message.error('申请缴纳税款不能为空');
           return;
         }
+      }
+      let dateVerity = params.details.some(item => {
+        return !item.taxPeriod
+      })
+      if (dateVerity) {
+        this.$Message.error('请选择所属期间');
+        return;
       }
       // 所属期间字段显示月份，但提交后台需要精确值日
       params.details.map(item => {

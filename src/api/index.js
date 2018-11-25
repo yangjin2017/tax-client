@@ -345,12 +345,13 @@ export const taxAlreadyHandle = params => {
 export const uploadFile = params => {
     return uploadFileRequest('/file/upload', params);
 }
-export const downloadFile = (fileName, params) => {
-    return postRequest(`/file/download/${fileName}`, params);
+// 下载文件
+export const downloadFile = name => {
+    return `/api//file/download/${name}`
 }
 // 预览文件
-export const previewFile = (name, params) => {
-    return getRequest(`/file/${name}`, params);
+export const previewFile = name => {
+    return `/api/file/${name}`
 }
 // 查询资料
 export const getFilesList = params => {

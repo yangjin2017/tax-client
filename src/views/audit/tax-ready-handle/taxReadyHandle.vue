@@ -1,3 +1,15 @@
+<style lang="less">
+.vertical-center-modal{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .ivu-modal{
+    top: 0;
+  }
+}
+</style>
+
 <template>
   <div class="search">
     <Row>
@@ -20,6 +32,28 @@
     </Card>
     </Col>
     </Row>
+    <Modal 
+      v-model="handelModal" 
+      title="请处理" 
+      class-name="vertical-center-modal"
+      @on-ok="submit"
+      width="400">
+      <Row v-if="form.choice">
+        <Col span="12" style="text-align: center;"><Button type="success" @click="handleOk">同意</Button></Col>
+        <Col span="12" style="text-align: center;"><Button type="error" @click="handleRefuse">拒绝</Button></Col>
+      </Row>
+      <Form>
+        <FormItem label="操作" :label-width="80">
+          <Select v-model="form.handle">
+            <Option value="agree" >同意</Option>
+            <Option value="refuse" >拒绝</Option>
+          </Select>
+        </FormItem>
+        <FormItem label="拒绝原因" v-if="form.handle === 'refuse'" :label-width="80">
+          <Input type="textarea" v-model="form.refuseReason" placeholder="请输入拒绝原因"></Input>
+        </FormItem>
+      </Form>
+    </Modal>
   </div>
 </template>
 
@@ -30,6 +64,12 @@ export default {
   data() {
     return {
       loading: false,
+      handelModal: false,
+      form: {
+        id: '',
+        handle: 'agree',
+        refuseReason: ''
+      },
       columns: [
         {
           type: "index",
@@ -133,8 +173,10 @@ export default {
     },
     /* 处理申请 */
     handle(v) {
-      
-    }
+      this.form.id = v.id;
+      this.handelModal = true;
+    },
+    submit() {}
   },
   mounted() {
     this.init();
