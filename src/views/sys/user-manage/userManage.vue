@@ -448,7 +448,10 @@ export default {
           key: "createTime",
           sortable: true,
           sortType: "desc",
-          width: 150
+          minWidth: 150,
+          render: (h, params) => {
+            return h('div', new Date(params.row.createTime).format())
+          }
         },
         {
           title: "操作",

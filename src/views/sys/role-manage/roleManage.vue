@@ -119,7 +119,10 @@ export default {
           key: "createTime",
           width: 160,
           sortable: true,
-          sortType: "desc"
+          sortType: "desc",
+          render: (h, params) => {
+            return h('div', new Date(params.row.createTime).format())
+          }
         },
         /* {
           title: "更新时间",

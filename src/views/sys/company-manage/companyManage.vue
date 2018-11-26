@@ -132,7 +132,10 @@ export default {
           title: "成立日期",
           key: "establishmentTime",
           sortable: true,
-          width: 160
+          width: 160,
+          render: (h, params) => {
+            return h('div', new Date(params.row.establishmentTime).format())
+          }
         },
         {
           title: "所属国家",
