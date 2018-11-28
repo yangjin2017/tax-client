@@ -340,6 +340,14 @@ export const taxReadyHandle = params => {
 export const taxAlreadyHandle = params => {
     return postRequest('/tax/alreadyHandle', params)
 }
+// 补充税金申请
+export const taxReplenishment = params => {
+    return postRequest('/tax/replenishment', params)
+}
+// 获取当前登录用户的上级审核人
+export const getReviewer = params => {
+    return getRequest('/user/getReviewer', params)
+}
 
 // 上传文件
 export const uploadFile = params => {

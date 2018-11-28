@@ -8,8 +8,7 @@
       <scroll-bar ref="scrollBar">
         <shrinkable-menu :shrink="shrink" @on-change="handleSubmenuChange" :theme="menuTheme" :before-push="beforePush" :open-names="openedSubmenuArr" :menu-list="menuList">
           <div slot="top" class="logo-con">
-            <img v-show="!shrink" src="../assets/logo.png" key="max-logo" />
-            <img v-show="shrink" src="../assets/logo-min.png" key="min-logo" />
+            税务管理系统
           </div>
         </shrinkable-menu>
       </scroll-bar>
@@ -27,7 +26,7 @@
           </div>
         </div>
         <div class="header-avator-con">
-          <full-screen v-model="isFullScreen" @on-change="fullscreenChange"></full-screen>
+          <!-- <full-screen v-model="isFullScreen" @on-change="fullscreenChange"></full-screen>
           <Dropdown @on-click="handleLanDropdown" class="options">
             <Icon type="md-globe" :size="24" class="language"></Icon>
             <DropdownMenu slot="list">
@@ -36,18 +35,18 @@
             </DropdownMenu>
           </Dropdown>
           <lock-screen></lock-screen>
-          <message-tip v-model="mesCount"></message-tip>
+          <message-tip v-model="mesCount"></message-tip> -->
           <div class="user-dropdown-menu-con">
             <Row type="flex" justify="end" align="middle" class="user-dropdown-innercon">
               <Dropdown transfer trigger="hover" @on-click="handleClickUserDropdown">
                 <a href="javascript:void(0)">
                   <span class="main-user-name">{{ username }}</span>
                   <Icon type="md-arrow-dropdown" />
-                  <Avatar :src="avatarPath" style="background: #619fe7;margin-left: 10px;"></Avatar>
+                  <!-- <Avatar :src="avatarPath" style="background: #619fe7;margin-left: 10px;"></Avatar> -->
                 </a>
                 <DropdownMenu slot="list">
-                  <DropdownItem name="ownSpace">{{ $t('userCenter') }}</DropdownItem>
-                  <DropdownItem name="ownSpaceOld">{{ $t('userCenterOld') }}</DropdownItem>
+                  <!-- <DropdownItem name="ownSpace">{{ $t('userCenter') }}</DropdownItem>
+                  <DropdownItem name="ownSpaceOld">{{ $t('userCenterOld') }}</DropdownItem> -->
                   <DropdownItem name="changePass">{{ $t('changePass') }}</DropdownItem>
                   <DropdownItem name="loginout" divided>{{ $t('logout') }}</DropdownItem>
                 </DropdownMenu>

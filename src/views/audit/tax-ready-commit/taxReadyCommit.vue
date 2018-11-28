@@ -147,6 +147,8 @@ export default {
       }
     },
     edit(v) {
+      // this.$router.push({name: 'taxApplicationEdit', params: {type: 'readyCommit', params: v}});
+      this.$store.commit('closePage', 'taxApplication')
       this.$router.push({name: 'taxApplication', params: {type: 'readyCommit', params: v}});
     },
     remove(v) {

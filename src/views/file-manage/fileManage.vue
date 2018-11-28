@@ -32,6 +32,7 @@
     <Modal
         v-model="priviewModal"
         :title="fileName"
+        class-name="preview-modal"
         width="700"
         footer-hide>
         <iframe style="width: 100%; height: 600px;" :src="filePath" frameborder="0"></iframe>
@@ -229,7 +230,7 @@ export default {
 </script>
 
 <style>
-.ivu-modal-body {
+.preview-modal .ivu-modal-body {
   padding: 0;
 }
 </style>

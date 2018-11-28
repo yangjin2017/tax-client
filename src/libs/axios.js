@@ -26,6 +26,9 @@ axios.interceptors.response.use(response => {
             return data;
         default:
             data.success = false;
+            if (data.errCode) {
+                Message.error(data.errMsg);
+            }
             return Promise.reject(data);
     }
 

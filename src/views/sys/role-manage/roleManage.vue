@@ -371,9 +371,10 @@ export default {
         onOk: () => {
           this.operationLoading = true;
           deleteRole(v.id).then(res => {
-            this.operationLoading = false;
             this.$Message.success("删除成功");
             this.getRoleList();
+          }).finally(() => {
+            this.operationLoading = false;
           });
         }
       });

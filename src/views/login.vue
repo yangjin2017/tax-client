@@ -2,8 +2,8 @@
   <Row type="flex" justify="center" align="middle" class="login" @keydown.enter.native="submitLogin">
     <Col :xs="{span:22}" style="width: 368px;">
     <Row class="header">
-      <img src="../assets/xboot.png" width="220px" />
-      <div class="description">X-Boot 是很不错的Web前后端分离架构开发平台</div>
+      <!-- <img src="../assets/xboot.png" width="220px" /> -->
+      <div class="description">税务管理系统</div>
     </Row>
   
     <Alert type="error" show-icon v-if="error">{{errorMsg}}</Alert>
@@ -20,7 +20,7 @@
             </FormItem>
           </Form>
         </TabPane>
-        <TabPane label="手机号登录" name="mobile" icon="ios-phone-portrait">
+        <!-- <TabPane label="手机号登录" name="mobile" icon="ios-phone-portrait">
           <Form ref="mobileLoginForm" :model="form" :rules="rules" class="form">
             <FormItem prop="mobile">
               <Input v-model="form.mobile" prefix="ios-phone-portrait" size="large" clearable placeholder="请输入手机号" />
@@ -36,20 +36,20 @@
               </Row>
             </FormItem>
           </Form>
-        </TabPane>
+        </TabPane> -->
       </Tabs>
   
-      <Row type="flex" justify="space-between" class="code-row-bg">
+      <!-- <Row type="flex" justify="space-between" class="code-row-bg">
         <Checkbox v-model="saveLogin" size="large">自动登录</Checkbox>
         <a class="forget-pass" @click="showAccount">忘记密码</a>
-      </Row>
+      </Row> -->
       <Row>
         <Button class="login-btn" type="primary" size="large" :loading="loading" @click="submitLogin" long>
                             <span v-if="!loading">登录</span>
                             <span v-else>登录中...</span>
                         </Button>
       </Row>
-      <Row type="flex" justify="space-between" class="code-row-bg other-login">
+      <!-- <Row type="flex" justify="space-between" class="code-row-bg other-login">
         <div class="other-way icons">
           其它方式登录
           <div class="other-icon" @click="toGithubLogin">
@@ -66,10 +66,10 @@
           </div>
         </div>
         <router-link to="/regist"><a class="forget-pass">注册账户</a></router-link>
-      </Row>
+      </Row> -->
     </Row>
   
-    <Row class="foot">
+    <!-- <Row class="foot">
       <Row type="flex" justify="space-around" class="code-row-bg help">
         <a class="item" href="https://github.com/Exrick/x-boot" target="_blank">帮助</a>
         <a class="item" href="https://github.com/Exrick/x-boot" target="_blank">隐私</a>
@@ -78,7 +78,7 @@
       <Row type="flex" justify="center" class="code-row-bg copyright">
         Copyright © 2018-Present <a href="http://exrick.cn" target="_blank" style="margin:0 5px;">Exrick</a> 版权所有
       </Row>
-    </Row>
+    </Row> -->
     </Col>
   </Row>
 </template>
@@ -120,9 +120,9 @@ export default {
       maxLength: 6,
       errorCode: "",
       form: {
-        username: "admin",
-        password: "123456",
-        mobile: "捐赠获取完整版功能",
+        username: "",
+        password: "",
+        mobile: "",
         code: ""
       },
       rules: {
@@ -191,58 +191,30 @@ export default {
               saveLogin: this.saveLogin
             }).then(res => {
               this.setStore("accessToken", res.token);
-
-              // TODO: 暂时跳过获取用户信息
-              var res = {
-                result: {username: 'admin', id: '682265633886208'},
-                avatar: 'https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3841743209,952064471&fm=27&gp=0.jpg'
-              }
-              if (this.saveLogin) {
-                // 保存7天
-                Cookies.set("userInfo", JSON.stringify(res.result), {
-                  expires: 7
-                });
-              } else {
-                Cookies.set("userInfo", JSON.stringify(res.result));
-              }
-              this.setStore("userInfo", res.result);
-              this.$store.commit("setAvatarPath", res.result.avatar);
-              // 加载菜单
-              util.initRouter(this);
-              this.$router.push({
-                name: "home_index"
-              });
-              return;
-              // TODO:
-
-
               // 获取用户信息
               userInfo().then(res => {
-                if (res.success === true) {
-                  // 避免超过大小限制
-                  delete res.result.permissions;
-                  if (this.saveLogin) {
-                    // 保存7天
-                    Cookies.set("userInfo", JSON.stringify(res.result), {
-                      expires: 7
-                    });
-                  } else {
-                    Cookies.set("userInfo", JSON.stringify(res.result));
-                  }
-                  this.setStore("userInfo", res.result);
-                  this.$store.commit("setAvatarPath", res.result.avatar);
-                  // 加载菜单
-                  util.initRouter(this);
-                  this.$router.push({
-                    name: "home_index"
+                // 避免超过大小限制
+                delete res.data.permissions;
+                if (this.saveLogin) {
+                  // 保存7天
+                  Cookies.set("userInfo", JSON.stringify(res.data), {
+                    expires: 7
                   });
                 } else {
-                  this.loading = false;
+                  Cookies.set("userInfo", JSON.stringify(res.data));
                 }
+                this.setStore("userInfo", res.data);
+                this.$store.commit("setAvatarPath", res.data.avatar);
+                // 加载菜单
+                util.initRouter(this);
+                this.$router.push({
+                  name: "home_index"
+                });
               });
             }).catch(err => {
-              this.loading = false;
               this.showErrorMsg(err.errMsg);
+            }).finally(() => {
+              this.loading = false;
             });
           }
         });

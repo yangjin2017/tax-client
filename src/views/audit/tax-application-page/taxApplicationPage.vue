@@ -5,32 +5,22 @@
   .preview-modal .ivu-modal-body {
     padding: 0;
   }
-  .ivu-upload .ivu-input-wrapper {
-    width: 59%;
-    margin-right: 10px;
-  }
-  .upload-box .ivu-upload-select {
-    width: 500px;
-  }
-  .preview-modal-inline .ivu-input-wrapper {
-    width: 70%;
-    margin-right: 10px;
-  }
 </style>
 <template>
+<!-- 税金申请 - 审批流程 -->
   <Row>
     <Col>
     <Card>
       <Row>
         <Form ref="form" :model="form" inline :label-width="90" class="search-form">
           <Form-item label="公司名称" prop="companyId">
-            <Select v-model="form.companyId" filterable style="width: 200px" @on-change="changeCompany" label-in-value>
+            <Select v-model="form.companyId" filterable disabled style="width: 200px" @on-change="changeCompany" label-in-value>
               <Option v-for="item in companyList" :value="item.id" :key="item.id" :label="item.name">
               </Option>
             </Select>
           </Form-item>
           <Form-item label="税务识别号码" prop="tin">
-            <Input type="text" v-model="form.tin" readonly style="width: 200px" />
+            <Input type="text" v-model="form.tin" disabled style="width: 200px" />
           </Form-item>
           <Form-item label="国家" prop="countryCode">
             <Select v-model="form.countryCode" disabled style="width:200px">
@@ -42,41 +32,23 @@
               <Option v-for="item in dictCurrencys" :value="item.code" :key="item.id">{{ item.name }}</Option>
             </Select>
           </Form-item>
-          <!-- <Form-item label="申请人" prop="applicantName">
-            <Input type="text" v-model="form.applicantName" clearable placeholder="请输入申请人姓名" style="width: 200px" />
-          </Form-item> -->
           <Form-item label="备注" prop="remarks">
-            <Input type="text" v-model="form.remarks" :maxlength="200" clearable placeholder="请输入备注" style="width: 200px" />
-          </Form-item>
-          <Form-item label="选择审核人">
-            <Select v-model="form.reviewer" style="width:200px">
-              <Option v-for="item in reviewers" :value="item.id" :key="item.id">{{ item.realName }}</Option>
-            </Select>
+            <Input type="text" v-model="form.remarks" disabled :maxlength="200" clearable placeholder="请输入备注" style="width: 200px" />
           </Form-item>
           <br/>
-          <Form-item label="财务报表" prop="financialReport">
-            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'FINANCE_REPORT'}" :show-upload-list="false" :on-success="financeUploadSuc" class="upload-box">
-              <Input type="text" readonly v-model="form.financialReportPath" />
+          <!-- <Form-item label="财务报表" prop="financialReport">
+            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'FINANCE_REPORT'}" :show-upload-list="false" :on-success="financeUploadSuc">
               <Button icon="ios-cloud-upload-outline">上传文件</Button>
-              <!-- <span style="padding-left: 10px;" v-if="form.financialReport">已上传</span> -->
+              <span style="padding-left: 10px;" v-if="form.financialReport">已上传</span>
             </Upload>
-          </Form-item>
+          </Form-item> -->
         </Form>
         <Spin size="large" fix v-if="loading"></Spin>
       </Row>
       <Row class="operation">
-        <!-- <Button @click="delAll" icon="md-trash">批量删除</Button> -->
-        <Button @click="addColumn" icon="md-add">增加一栏</Button>
-        <Button @click="submit('save')" >保存</Button>
         <Button @click="submit" >提交</Button>
         <circleLoading v-if="operationLoading"/>
       </Row>
-      <!-- <Row>
-        <Alert show-icon>
-          已选择 <span class="select-count">{{selectCount}}</span> 项
-          <a class="select-clear" @click="clearSelectAll">清空</a>
-        </Alert>
-      </Row> -->
       <Row>
         <Table ref="table" border :columns="columns" :data="data" @on-selection-change="changeSelect"></Table>
       </Row>
@@ -88,57 +60,24 @@
         @on-cancel="uploadModalCancel">
         <Form label-position="left" :label-width="100">
           <FormItem label="预申报表">
-            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'PRE_TAX_REPORT'}" :show-upload-list="false" :on-success="uploadSuc">
-              <Input type="text" readonly v-model="fileUploadForm.preTaxReturnsPath" />
-              <Button icon="ios-cloud-upload-outline">上传文件</Button>
-              <!-- <Button v-if="fileUploadForm.preTaxReturns" @click.stop="filePriview(fileUploadForm.preTaxReturnsPath)">预览</Button> -->
-            </Upload>
-          </FormItem>
-          <FormItem label="申报表" v-if="routeType === 'taxReplenishment'">
-            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'TAX_REPORT'}" :show-upload-list="false" :on-success="uploadSuc">
-              <Input type="text" readonly v-model="fileUploadForm.taxReturnsPath" />
-              <Button icon="ios-cloud-upload-outline">上传文件</Button>
-              <!-- <div v-if="fileUploadForm.taxReturns"><Button @click.stop="filePriview(fileUploadForm.taxReturnsPath)">预览</Button></div> -->
-            </Upload>
-          </FormItem>
-          <FormItem label="完税申报表" v-if="routeType === 'taxReplenishment'">
-            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'DONE_TAX_REPORT'}" :show-upload-list="false" :on-success="uploadSuc">
-              <Input type="text" readonly v-model="fileUploadForm.paymentCertificatePath" />
-              <Button icon="ios-cloud-upload-outline">上传文件</Button>
-              <!-- <div v-if="fileUploadForm.paymentCertificate"><Button @click.stop="filePriview(fileUploadForm.paymentCertificatePath)">预览</Button></div> -->
-            </Upload>
-          </FormItem>
-          <FormItem label="其它" v-if="routeType === 'taxReplenishment'">
-            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'OTHER'}" :show-upload-list="false" :on-success="uploadSuc">
-              <Input type="text" readonly v-model="fileUploadForm.otherUploadIdPath" />
-              <Button icon="ios-cloud-upload-outline">上传文件</Button>
-              <!-- <div v-if="fileUploadForm.otherUploadId"><Button @click.stop="filePriview(fileUploadForm.otherUploadIdPath)">预览</Button></div> -->
-            </Upload>
-          </FormItem>
-      </Form>
-    </Modal>
-    <Modal
-        :closable="false"
-        class-name="preview-modal-inline"
-        v-model="showPreviewModal">
-        <Form label-position="left" :label-width="100">
-          <FormItem label="预申报表">
-            <Input type="text" readonly 
-            v-model="fileUploadForm.preTaxReturnsPath" />
-            <Button v-if="fileUploadForm.preTaxReturns" @click.stop="filePriview(fileUploadForm.preTaxReturnsPath)">预览</Button>
+            <div v-if="fileUploadForm.preTaxReturns">{{ fileUploadForm.preTaxReturnsPath }}&nbsp;&nbsp;<Button @click.stop="filePriview(fileUploadForm.preTaxReturnsPath)">预览</Button></div>
           </FormItem>
           <FormItem label="申报表">
-            <Input type="text" readonly v-model="fileUploadForm.taxReturnsPath" />
-            <Button v-if="fileUploadForm.taxReturns" @click.stop="filePriview(fileUploadForm.taxReturnsPath)">预览</Button>
+            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'TAX_REPORT'}" :show-upload-list="false" :on-success="uploadSuc">
+              <Button icon="ios-cloud-upload-outline">上传文件</Button>
+              <div v-if="fileUploadForm.taxReturns">{{ fileUploadForm.taxReturnsPath }}&nbsp;&nbsp;<Button @click.stop="filePriview(fileUploadForm.taxReturnsPath)">预览</Button></div>
+            </Upload>
           </FormItem>
           <FormItem label="完税申报表">
-              <Input type="text" readonly v-model="fileUploadForm.paymentCertificatePath" />
-              <Button v-if="fileUploadForm.paymentCertificate" @click.stop="filePriview(fileUploadForm.paymentCertificatePath)">预览</Button>
+            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'DONE_TAX_REPORT'}" :show-upload-list="false" :on-success="uploadSuc">
+              <Button icon="ios-cloud-upload-outline">上传文件</Button>
+              <div v-if="fileUploadForm.paymentCertificate">{{ fileUploadForm.paymentCertificatePath }}&nbsp;&nbsp;<Button @click.stop="filePriview(fileUploadForm.paymentCertificatePath)">预览</Button></div>
             </Upload>
           </FormItem>
           <FormItem label="其它">
-              <Input type="text" readonly v-model="fileUploadForm.otherUploadIdPath" />
-              <Button v-if="fileUploadForm.otherUploadId" @click.stop="filePriview(fileUploadForm.otherUploadIdPath)">预览</Button>
+            <Upload action="/api/file/upload" :headers="{accessToken: accessToken}" name="file" :data="{materialTypeDict: 'OTHER'}" :show-upload-list="false" :on-success="uploadSuc">
+              <Button icon="ios-cloud-upload-outline">上传文件</Button>
+              <div v-if="fileUploadForm.otherUploadId">{{ fileUploadForm.otherUploadIdPath }}&nbsp;&nbsp;<Button @click.stop="filePriview(fileUploadForm.otherUploadIdPath)">预览</Button></div>
             </Upload>
           </FormItem>
       </Form>
@@ -159,10 +98,7 @@ import {
   getAllCompany,  // 获取所有公司
   getDictListDataByType,  // 根据类型获取字典信息
   getCompanyByName,   // 根据公司名称获取公司详情
-  taxAdd,   // 税金申请新增
   taxDetail,    // 获取税金申请详情（待提申请）
-  taxEdit,    // 税金申请编辑
-  getReviewer,   // 获取当前登录用户的上级审核人
   previewFile   // 文件预览
 } from '@/api/index'
 import { dictType } from '@/libs/constance.js'
@@ -174,7 +110,6 @@ export default {
     return {
       loading: false,
       priviewModal: false,
-      showPreviewModal: false,
       fileName: '',
       filePath: '',
       operationLoading: false,
@@ -182,45 +117,20 @@ export default {
       showUploadModal: false,
       form: {
         companyId: '',
-        companyName: '',
         tin: '',
         countryCode: '',
         currency: '',
         applicantName: '',
         remarks: '',
-        reviewer: '',
         financialReport: '',
-        financialReportPath: ''
+        id: ''
       },
       columns: [
-        {
-          title: '操作',
-          width: 80,
-          fixed: 'right',
-          align: "center",
-          render: (h, params) => {
-            return h('Button', {
-              props: {
-                type: "error",
-                size: "small"
-              },
-              on: {
-                click: () => {
-                  if (this.data.length > 1) {
-                    this.data.splice(params.index, 1);
-                  }
-                }
-              }
-            }, '删除')
-          }
-        },
         {
           title: '所属期间',
           key: "taxPeriod",
           width: 160,
           align: 'center',
-          // render: this.renderSelect
-          render: this.renderDatePicker
         },
         {
           title: '税种',
@@ -233,68 +143,55 @@ export default {
           title: '应缴税额',
           key: "payableTax",
           align: 'center',
-          width: 120,
-          render: this.renderInput
+          width: 120
         },
         {
           title: '应缴滞纳金',
           key: "lateFeePayable",
           align: 'center',
-          width: 120,
-          render: this.renderInput
+          width: 120
         },
         {
           title: '申请缴纳税款',
           key: "applTaxPayment",
           align: 'center',
-          width: 120,
-          render: this.renderInput
-          /* render: (h, params) => {
-            let item = this.data[params.index];
-            item[params.column.key] = parseFloat(item.payableTax) + parseFloat(item.lateFeePayable);
-            return h('div', item[params.column.key])
-          } */
+          width: 120
         },
         {
           title: '缴款截止日期',
           key: "deadline",
           width: 160,
           align: 'center',
-          render: this.renderDatePicker
+          render: (h, parmas) => {
+            return h('div', new Date(params.row.deadline).format())
+          }
         },
         {
           title: '实缴税额',
           key: "taxPaid",
           align: 'center',
-          width: 120,
-          render: this.renderInput
+          width: 120
         },
         {
           title: '实缴滞纳金',
           key: "overduePayment",
           align: 'center',
-          width: 120,
-          render: this.renderInput
+          width: 120
         },
         {
           title: '实际缴纳税款',
+          key: 'taxPaid',
           align: 'center',
-          width: 120,
-          render: (h, params) => {
-            return h('div', {
-              domProps: {
-                innerText: parseFloat(params.row.taxPaid) + parseFloat(params.row.overduePayment)
-              }
-            })
-            return h('div', parseFloat(this.data[params.index].taxPaid) + parseFloat(this.data[params.index].overduePayment))
-          }
+          width: 120
         },
         {
           title: '实际缴纳日期',
           key: "paymentTime",
           align: 'center',
           width: 160,
-          render: this.renderDatePicker
+          render: (h, parmas) => {
+            return h('div', new Date(params.row.paymentTime).format())
+          }
         },
         {
           title: '附件',
@@ -303,7 +200,7 @@ export default {
           width: 180,
           render: (h, params) => {
             return h("div", [
-                h(
+                /* h(
                   "Button",
                   {
                     props: {
@@ -333,7 +230,7 @@ export default {
                     }
                   },
                   "上传"
-                ),
+                ), */
                 h(
                   "Button",
                   {
@@ -358,26 +255,11 @@ export default {
                           otherUploadId,
                           otherUploadPath: otherUpload
                         }
-                        this.showPreviewModal = true;
+                        this.showUploadModal = true;
                       }
                     }
                   },
                   "预览"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "error",
-                      size: "small"
-                    },
-                    on: {
-                      click: () => {
-                        // this.remove(params.row);
-                      }
-                    }
-                  },
-                  "删除"
                 )
               ]);
           }
@@ -386,13 +268,11 @@ export default {
           title: '备注',
           key: "remarks",
           align: 'center',
-          width: 160,
-          render: this.renderInput
+          width: 160
         },
       ],
       data: [],
       companyList: [],
-      reviewers: [],
       dictCountrys: [],
       dictCurrencys: [],
       dictTaxCategorys: [],
@@ -404,48 +284,39 @@ export default {
         taxReturns: '',
         paymentCertificate: '',
         otherUploadId: ''
-      },
-      routeType: ''
+      }
     }
   },
   methods: {
     init() {
       this.initPageData()
       this.initCompanyList()
-      this.getReviewerList()
       this.getDictData()
       this.addColumn()
     },
     // 获取页面数据
     initPageData() {
-      let type = this.$route.params.type;
-      if (!type) return;
-      this.routeType = type;
-      // 待提任务回显
-      if (type === 'readyCommit') {
-        this.loading = true;
-        taxDetail(this.$route.params.params.id).then(res => {
-          let data = res.data.details;
-          data && data.map(item => {
-            item.taxPeriod.replace(/-01$/, '');
-            item.paymentTime = new Date(item.paymentTime).format('yyyy-MM-dd');
-            item.deadline = new Date(item.deadline).format('yyyy-MM-dd');
-          });
-          this.data = data || [];
-          let params = res.data;
-          this.form.id = params.id;
-          this.form.companyId = params.companyId;
-          this.form.companyName = params.companyName;
-          this.form.tin = params.tin;
-          this.form.countryCode = params.countryCode;
-          this.form.currency = params.currency;
-          this.form.remarks = params.remarks;
-          this.form.financialReport = params.financialReport;
-          this.form.financialReportPath = params.financialReportPath;
-        }).finally(() => {
-          this.loading = false;
-        })
-      }
+      // 任务回显
+      this.loading = true;
+      taxDetail(this.$route.params.params.id).then(res => {
+        let data = res.data.details;
+        data && data.map(item => {
+          item.taxPeriod.replace(/-01$/, '');
+          item.paymentTime = new Date(item.paymentTime).format('yyyy-MM-dd');
+          item.deadline = new Date(item.deadline).format('yyyy-MM-dd');
+        });
+        this.data = data || [];
+        let params = res.data;
+        this.form.companyId = params.companyId;
+        this.form.tin = params.tin;
+        this.form.countryCode = params.countryCode;
+        this.form.currency = params.currency;
+        this.form.remarks = params.remarks;
+        // this.form.financialReport = params.financialReport;
+        this.form.id = params.id;
+      }).finally(() => {
+        this.loading = false;
+      })
     },
     /* 获取公司列表 */
     initCompanyList() {
@@ -453,11 +324,6 @@ export default {
         .then(res => {
           this.companyList = res.data;
         })
-    },
-    getReviewerList() {
-      getReviewer().then(res => {
-        this.reviewers = res.data;
-      })
     },
     /* 获取字典信息 */
     getDictData() {
@@ -478,34 +344,6 @@ export default {
           this.dictTaxPayments = res.data;
         })
     },
-    /* 删除 */
-    delAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 条数据?",
-        onOk: () => {
-          let ids = "";
-          this.selectList.forEach(function(e) {
-            console.log(e);
-            ids += e.id + ",";
-          });
-          /* ids = ids.substring(0, ids.length - 1);
-          this.operationLoading = true;
-          deleteLog(ids).then(res => {
-            this.operationLoading = false;
-            if (res.success === true) {
-              this.$Message.success("删除成功");
-              this.clearSelectAll();
-              this.init();
-            }
-          }); */
-        }
-      });
-    },
     /* 取消选中 */
     clearSelectAll() {
       this.$refs.table.$children[0].selectAll(false);
@@ -515,7 +353,6 @@ export default {
       this.selectList = e;
       this.selectCount = e.length;
     },
-    /* 增加一栏 */
     addColumn() {
       this.data.push({
         taxPeriod: '',
@@ -565,24 +402,6 @@ export default {
           }
         })
       }
-      /* return h('Input', {
-        props: {
-          type: 'text',
-          maxlength: params.column.key === 'remarks' ? 100 : 10,
-          value: temp || params.row[params.column.key],
-          number: params.column.key != 'remarks'
-        },
-        on: {
-          input: e => {
-            if (params.column.key === 'remarks') {
-              params.row[params.column.key] = e;
-            } else {
-              params.row[params.column.key] = isNaN(e) ? 0 : e;
-            }
-            this.data[params.index] = params.row;
-          }
-        }
-      }) */
     },
     /* 表格框下拉选择框渲染函数 */
     renderSelect(h, params) {
@@ -629,7 +448,6 @@ export default {
       getCompanyByName({name: company.label})
         .then(res => {
           this.form.tin = res.data.tin;
-          this.form.companyName = company.label;
           this.form.countryCode = res.data.countryCode;
           this.form.currency = res.data.currencyCode;
         })
@@ -688,43 +506,24 @@ export default {
     submit(save) {
       let params = {...this.form, details: this.data};
       params.executeType = save === 'save' ? 0 : 1;
-      if (save != 'save') {
-        if (!params.companyId) {
-          this.$Message.error('请选择公司');
-          return;
-        }
-        let flag = params.details.some((item) => {
-          if (item.applTaxPayment == '') {
-            item.applTaxPayment = parseFloat(item.payableTax) + parseFloat(item.lateFeePayable);
-          }
-          return item.applTaxPayment <= 0
-        });
-        if (flag) {
-          this.$Message.error('申请缴纳税款不能为空');
-          return;
-        }
-        let preTaxReturnsVerity = params.details.some(item => {
-          return !item.preTaxReturns;
-        });
-        if (preTaxReturnsVerity) {
-          this.$Message.error('请上传预申报表');
-          return;
-        }
+      if (!params.financialReport) {
+        this.$Message.error('请上传财务报表');
+        return;
       }
-      let dateVerity = params.details.some(item => {
-        return !item.taxPeriod
+      let flag = params.details.some(item => {
+        return !item.taxReturns || !item.paymentCertificate || !item.otherUploadId
       })
-      if (dateVerity) {
-        this.$Message.error('请选择所属期间');
+      if (flag) {
+        this.$Message.error('请上传附件');
         return;
       }
       // 所属期间字段显示月份，但提交后台需要精确值日
       params.details.map(item => {
         item.taxPeriod = item.taxPeriod && item.taxPeriod + '-01';
+        item.taxApplicationId = params.id;
       });
       this.loading = true;
-      let fn = this.$route.params.type === 'readyCommit' ? taxEdit : taxAdd;
-      fn(params).then(res => {
+      taxReplenishment(params).then(res => {
         this.$Message.success('操作成功')
       }).finally(() => {
         this.loading = false;

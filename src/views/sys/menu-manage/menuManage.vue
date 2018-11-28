@@ -498,7 +498,7 @@ export default {
             this.selectCount = 0;
             this.canelEdit();
             this.init();
-          });
+          }).catch(err => {});
         }
       });
     }

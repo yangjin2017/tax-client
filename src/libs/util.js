@@ -8,7 +8,7 @@ let util = {
 };
 
 util.title = function (title) {
-    title = title || 'X-Boot 前后端分离开发平台';
+    title = title || '税务管理系统';
     window.document.title = title;
 };
 
@@ -242,6 +242,13 @@ util.initRouter = function (vm) {
             title: '404-页面不存在'
         },
         component: 'error-page/404'
+    }, {
+        path: '/audit/tax-application-edit',
+        name: 'taxApplicationEdit',
+        meta: {
+            title: '税金申请 - 编辑'
+        },
+        component: 'audit/tax-application-edit/taxApplicationEdit'
     }];
 
     // 判断用户是否登录
@@ -294,7 +301,7 @@ util.initRouterNode = function (routers, data) {
         let meta = {};
         // 给页面添加权限、标题、第三方网页链接
         meta.permTypes = menu.permTypes ? menu.permTypes : null;
-        meta.title = menu.title ? menu.title + " - X-Boot前后端分离开发平台 By: Exrick" : null;
+        meta.title = menu.title ? menu.title + " - 税务管理系统" : null;
         meta.url = menu.url ? menu.url : null;
         menu.meta = meta;
 
