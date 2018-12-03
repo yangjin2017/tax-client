@@ -212,7 +212,7 @@ export default {
                 });
               });
             }).catch(err => {
-              this.showErrorMsg(err.errMsg);
+              // this.showErrorMsg(err.errMsg);
             }).finally(() => {
               this.loading = false;
             });
