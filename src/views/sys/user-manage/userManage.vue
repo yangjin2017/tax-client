@@ -8,7 +8,7 @@
                 <Card>
                     <Row>
                         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-                            <Form-item label="用户名称" prop="username">
+                            <Form-item label="用户名" prop="username">
                               <Input type="text" v-model="searchForm.username" clearable placeholder="请输入用户名" style="width: 200px"/>
                             </Form-item>
                             <Form-item label="部门" prop="department">
@@ -86,6 +86,9 @@
         </Row>
         <Modal :title="modalTitle" v-model="userModalVisible" :mask-closable='false' :width="500" :styles="{top: '30px'}">
             <Form ref="userForm" :model="userForm" :label-width="70" :rules="userFormValidate">
+                <FormItem label="姓名" prop="realName">
+                    <Input v-model="userForm.realName" :maxlength="15" autocomplete="off"/>
+                </FormItem>
                 <FormItem label="用户名" prop="username">
                     <Input v-model="userForm.username" autocomplete="off"/>
                 </FormItem>
@@ -257,6 +260,7 @@ export default {
       modalTitle: "",
       userForm: {
         username: '',
+        realName: '',
         password: '',
         workNumber: null,
         /* sex: 1,

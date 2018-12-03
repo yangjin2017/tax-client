@@ -12,20 +12,20 @@
                 <Card>
                     <Row type="flex" class="user-infor">
                         <Col span="8">
-                        <Row class-name="made-child-con-middle" type="flex" align="middle">
+                        <!-- <Row class-name="made-child-con-middle" type="flex" align="middle">
                             <img class="avator-img" :src="avatarPath" />
-                        </Row>
+                        </Row> -->
                         </Col>
                         <Col span="16" style="padding-left:6px;">
                         <Row class-name="made-child-con-middle" type="flex" align="middle">
                             <div>
                                 <b class="card-user-infor-name">{{ username }}</b>
-                                <p>X-Boot 欢迎您的使用</p>
+                                <p>欢迎您的使用</p>
                             </div>
                         </Row>
                         </Col>
                     </Row>
-                    <div class="line-gray"></div>
+                    <!-- <div class="line-gray"></div>
                     <Row class="margin-top-8">
                         <Col span="8">
                         <p class="notwrap">本次登录地点:</p>
@@ -37,7 +37,7 @@
                         <p class="notwrap">天气:</p>
                         </Col>
                         <Col span="16" class="padding-left-8">{{weather}}</Col>
-                    </Row>
+                    </Row> -->
                 </Card>
                 </Col>
             </Row>

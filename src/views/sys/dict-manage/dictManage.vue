@@ -41,7 +41,7 @@
           <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
         </Row>
         <Row type="flex" justify="end" class="page">
-          <Page :current="pageNumber" :total="total" :page-size="pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>
+          <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>
         </Row>
       </Card>
       </Col>
@@ -150,7 +150,18 @@ export default {
         {
           title: '字典类型',
           key: 'type',
-          sortable: true
+          sortable: true,
+          render: (h, params) => {
+            return h('div', (() => {
+              for (let i = 0; i < this.typeIds.length; i++) {
+                let item = this.typeIds[i];
+                if (item.value == params.row.type) {
+                  return item.label
+                }
+              }
+              return '';
+            })())
+          }
         },
         {
           title: '备注',
