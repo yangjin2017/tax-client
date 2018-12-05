@@ -81,7 +81,7 @@ export default {
         {
           title: "操作名称",
           key: "method",
-          width: 110,
+          width: 200,
           sortable: true,
           fixed: "left"
         },
@@ -131,6 +131,11 @@ export default {
           title: "请求参数",
           // width: 200,
           key: "param",
+          tooltip: true
+        },
+        {
+          title: "数据变化",
+          key: "dataAfter",
           tooltip: true
         },
         {
