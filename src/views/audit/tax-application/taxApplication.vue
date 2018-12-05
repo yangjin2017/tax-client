@@ -156,7 +156,7 @@
 
 <script>
 import {
-  getAllCompany,  // 获取所有公司
+  getCompanyByUser,  // 获取所有公司
   getDictListDataByType,  // 根据类型获取字典信息
   getCompanyByName,   // 根据公司名称获取公司详情
   taxAdd,   // 税金申请新增
@@ -167,6 +167,7 @@ import {
 } from '@/api/index'
 import { dictType } from '@/libs/constance.js'
 import { getStore } from '@/libs/storage';
+import Cookies from "js-cookie";
 import circleLoading from "../../my-components/circle-loading.vue"
 export default {
   name: 'taxApplication',
@@ -449,7 +450,8 @@ export default {
     },
     /* 获取公司列表 */
     initCompanyList() {
-      getAllCompany()
+      let userId = JSON.parse(Cookies.get("userInfo")).id;
+      getCompanyByUser(userId)
         .then(res => {
           this.companyList = res.data;
         })

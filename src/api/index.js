@@ -80,14 +80,19 @@ export const getRelatedListData = (params) => {
     return getRequest('/relate/findByCondition', params)
 }
 
+// 获取所有公司
 export const getAllCompany = params => {
     return getRequest('/company/getAll', params)
+}
+// 获取该用户所属公司
+export const getCompanyByUser = userId => {
+    return getRequest(`/company/userId/${userId}`)
 }
 // 获取未被分配的公司列表
 export const getUnAssignCompany = params => {
     return getRequest('/company/getUnAssign', params)
 }
-// 获取公司列表
+// 分页获取公司列表
 export const getCompanyListData = params => {
     return postRequest('/company/getAllPage', params)
 }
